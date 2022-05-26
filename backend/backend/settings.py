@@ -109,9 +109,11 @@ ACCEPT_REGEX = False
 REJECT_REGEX = True
 
 USERNAME_REGEXES = [
-    [fr'(^{RESERVED_USERNAME})$', REJECT_REGEX],
-    [r'(^[\w.@+-]+)$', ACCEPT_REGEX],
+    (fr'(^{RESERVED_USERNAME})$', REJECT_REGEX,),
+    (r'(^[\w.@+-]+)$', ACCEPT_REGEX,),
 ]
+
+COLORS_HEX_REGEX = (r'^#(?:[0-9a-fA-F]{6})$', ACCEPT_REGEX,)
 
 # soon for api
 # REST_FRAMEWORK

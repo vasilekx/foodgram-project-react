@@ -12,3 +12,12 @@ def validate_username(value):
             message=_(f'{value} - недопустимое имя пользователя.'),
             inverse_match=inverse_match
         )(value)
+
+
+def validate_tag_color(value):
+    regex, inverse_match = value
+    RegexValidator(
+        regex=regex,
+        message=_(f'{value} - недопустимый код цвета.'),
+        inverse_match=inverse_match
+    )(value)
