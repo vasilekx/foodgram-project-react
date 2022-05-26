@@ -9,6 +9,7 @@ coreschema==0.0.4
 cryptography==37.0.2
 defusedxml==0.7.1
 Django==2.2.16
+django-cors-headers==3.11.0
 django-debug-toolbar==3.2.4
 django-extensions==3.1.5
 django-templated-mail==1.1.1
@@ -49,4 +50,3 @@ testfixtures==6.18.5
 tzdata==2022.1
 uritemplate==4.1.1
 urllib3==1.26.9
-django-cors-headers==3.11.0
