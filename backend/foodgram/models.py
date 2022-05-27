@@ -1,6 +1,7 @@
 # foodgram/models.py
 
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -67,8 +68,8 @@ class Follow(models.Model):
         related_name='follower',
         verbose_name=_('Подписчик'),
         help_text=_('Пользователь, который подписывается.'),
-        blank=True,
-        null=True
+        # blank=True,
+        # null=True
     )
     author = models.ForeignKey(
         User,
@@ -98,12 +99,12 @@ class Follow(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(
         _('Название ингредиента'),
-        max_length=256,
+        max_length=200,
         unique=True,
     )
     measurement_unit = models.CharField(
         _('Единица измерения ингредиента'),
-        max_length=256
+        max_length=200
     )
 
     def __str__(self):
@@ -149,15 +150,137 @@ class Tag(models.Model):
 
 
 # class Рецепты
+class Recipe(models.Model):
+    name = models.CharField(
+        _('Название'),
+        max_length=256,
+        help_text=_('Название рецепта')
+    )
+    text = models.TextField(
+        _('Описание'),
+        help_text=_('Описание рецепта')
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='recipes',
+        verbose_name=_('Автор'),
+        help_text=_('Автор, к которому будет относиться рецепт')
+    )
+    cooking_time = models.IntegerField(
+        _('Время приготовления'),
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(3600)
+        ],
+        help_text=_('Время приготовления (в минутах)')
+    )
+    image = ...
+    # tags = models.ForeignKey(
+    #     Tag,
+    #     on_delete=models.SET_NULL,
+    #     related_name='recipes',
+    #     verbose_name=_('Рецепт'),
+    #     null=True,
+    #     help_text=_('Тег, к которому будет относиться рецепт'),
+    # )
+    # ingredients = ...
+
+    def __str__(self):
+        return '{:.15}'.format(self.name)
+
+    class Meta:
+        verbose_name = _('Рецепт')
+        verbose_name_plural = _('Рецепты')
 
 
 # class тег рецепта recipe tag
+class RecipeTag(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.SET_NULL,
+        related_name='tags',
+        verbose_name=_('Рецепт'),
+        null=True,
+        help_text=_('Рецепт, к которому будет относиться тег'),
+    )
+    tags = models.ForeignKey(
+        Tag,
+        on_delete=models.SET_NULL,
+        related_name='recipes',
+        verbose_name=_('Тег'),
+        null=True,
+        help_text=_('Тег, к которому будет относиться рецепт'),
+    )
+
+    def __str__(self):
+        return f'{self.recipe} has {self.tags}'
+
+    class Meta:
+        verbose_name = _('Тег рецепта')
+        verbose_name_plural = _('Теги рецепта')
+        constraints = [
+            models.UniqueConstraint(fields=['recipe', 'tags'],
+                                    name='unique_relationships'),
+        ]
 
 
 # class Ингредиент рецепта  Recipe ingredient
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='ingredients',
+        verbose_name=_('Рецепт'),
+        help_text=_('Рецепт, к которому будет относиться ингредиент'),
+    )
+    ingredient = models.ForeignKey(
+        Tag,
+        on_delete=models.SET_NULL,
+        related_name='recipes',
+        verbose_name=_('Ингредиент'),
+        null=True,
+        help_text=_('Ингредиент, к которому будет относиться рецепт'),
+    )
+    amount = models.IntegerField(
+        _('Количество'),
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(10000)
+        ],
+        help_text=_('Количество ингредиента требуемого для рецепта')
+    )
+
+    def __str__(self):
+        return f'{self.recipe} has {self.ingredient}'
+
+    class Meta:
+        verbose_name = _('Ингредиент рецепта')
+        verbose_name_plural = _('Ингредиенты рецепта')
 
 
-# class избранный рецепт  favorite recipe
+# class избранный рецепт  favorite recipe http://127.0.0.1/api/recipes/{id}/favorite/
+class FavoriteRecipe(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name=_('Пользователь'),
+        help_text=_('Пользователь, у которого будет любимый рецепт')
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='users',
+        verbose_name=_('Рецепт'),
+        help_text=_('Рецепт, который есть у пользователей как любимый рецепт'),
+    )
 
+    def __str__(self):
+        return f'{self.user} has {self.recipe}'
+
+    class Meta:
+        verbose_name = _('Избранный рецепт')
+        verbose_name_plural = _('Избранные рецепты')
 
 # class купить рецепт buy recipe
