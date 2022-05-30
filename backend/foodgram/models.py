@@ -46,7 +46,7 @@ class User(AbstractUser):
     )
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'password']
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
     def __str__(self):
         return self.username
@@ -175,7 +175,7 @@ class Recipe(models.Model):
         ],
         help_text=_('Время приготовления (в минутах)')
     )
-    image = ...
+    # image = ...
     # tags = models.ForeignKey(
     #     Tag,
     #     on_delete=models.SET_NULL,
@@ -235,7 +235,7 @@ class RecipeIngredient(models.Model):
         help_text=_('Рецепт, к которому будет относиться ингредиент'),
     )
     ingredient = models.ForeignKey(
-        Tag,
+        Ingredient,
         on_delete=models.SET_NULL,
         related_name='recipes',
         verbose_name=_('Ингредиент'),
@@ -260,7 +260,7 @@ class RecipeIngredient(models.Model):
 
 
 # class избранный рецепт  favorite recipe http://127.0.0.1/api/recipes/{id}/favorite/
-class FavoriteRecipe(models.Model):
+class Favorite(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -283,4 +283,27 @@ class FavoriteRecipe(models.Model):
         verbose_name = _('Избранный рецепт')
         verbose_name_plural = _('Избранные рецепты')
 
-# class купить рецепт buy recipe
+
+# class купить рецепт buy recipe shopping cart
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='purchases',
+        verbose_name=_('Пользователь'),
+        help_text=_('Пользователь, у которого будет рецепт в списке покупок')
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='shoppers',
+        verbose_name=_('Рецепт'),
+        help_text=_('Рецепт, который есть у пользователей в списке покупок'),
+    )
+
+    def __str__(self):
+        return f'{self.user} has {self.recipe}'
+
+    class Meta:
+        verbose_name = _('Корзина')
+        verbose_name_plural = _('Корзины')
