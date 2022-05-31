@@ -12,6 +12,12 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=150, required=True)
     email = serializers.EmailField(max_length=254, required=True)
     is_subscribed = serializers.SerializerMethodField()
+    password = serializers.CharField(
+        min_length=6,
+        max_length=150,
+        write_only=True,
+        required=True
+    )
 
     class Meta:
         model = User
@@ -19,9 +25,9 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'email', 'username', 'first_name', 'last_name', 'password',
             'is_subscribed'
         )
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        # extra_kwargs = {
+        #     'password': {'write_only': True}
+        # }
 
     def validate_username(self, value):
         validate_username(value)
@@ -29,6 +35,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         return False
+
+    def create(self, validated_data):
+        user = super(UserSerializer, self).create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class MeUserSerializer(UserSerializer):

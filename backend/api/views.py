@@ -33,7 +33,7 @@ class UserViewSet(viewsets.ModelViewSet):
         detail=False,
         url_path='me',
         url_name='users_detail',
-        # permission_classes=[permissions.IsAuthenticated],
+        permission_classes=[permissions.IsAuthenticated],
         serializer_class=MeUserSerializer,
     )
     def users_detail(self, request):
