@@ -19,6 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
     # 'corsheaders',
     'django_filters',
     'users',
@@ -110,9 +112,47 @@ REST_FRAMEWORK = {
     # 'DEFAULT_AUTHENTICATION_CLASSES': (
     #     'rest_framework_simplejwt.authentication.JWTAuthentication',
     # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+}
+
+DJOSER = {
+    # 'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    # 'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+    # 'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    # 'SEND_ACTIVATION_EMAIL': True,
+    'LOGIN_FIELD': 'email',
+    # 'PASSWORD_RESET_CONFIRM_URL': False,
+    # 'USERNAME_RESET_CONFIRM_URL': False,
+    # 'ACTIVATION_URL': False,
+    # 'LOGOUT_ON_PASSWORD_CHANGE': False,  # Default: False
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+        'user_create': ['rest_framework.permissions.AllowAny'],
+
+        'token_create': ['rest_framework.permissions.AllowAny'],
+        'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
+
+        # 'activation': ['rest_framework.permissions.AllowAny'],
+        # 'password_reset': ['rest_framework.permissions.AllowAny'],
+        # 'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
+        # 'set_password': ['rest_framework.permissions.CurrentUserOrAdmin'],
+        # 'username_reset': ['rest_framework.permissions.AllowAny'],
+        # 'username_reset_confirm': ['rest_framework.permissions.AllowAny'],
+        # 'set_username': ['rest_framework.permissions.CurrentUserOrAdmin'],
+        # 'user_delete': ['rest_framework.permissions.IsAdminUser'],
+    },
+    'SERIALIZERS': {
+        'user': 'api.serializers.UserSerializer',
+        'user_list': 'api.serializers.UserSerializer',
+        'user_create': 'api.serializers.UserSerializer',
+        # 'user': 'djoser.serializers.UserSerializer',
+    }
 }
 
 
@@ -133,4 +173,3 @@ COLORS_HEX_REGEX = (r'^#(?:[0-9a-fA-F]{6})$', ACCEPT_REGEX,)
 
 # soon for api
 # REST_FRAMEWORK
-# SIMPLE_JWT
