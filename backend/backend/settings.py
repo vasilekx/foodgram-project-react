@@ -117,19 +117,14 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 2,
 }
 
 DJOSER = {
-    # 'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-    # 'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
-    # 'ACTIVATION_URL': '#/activate/{uid}/{token}',
-    # 'SEND_ACTIVATION_EMAIL': True,
     'LOGIN_FIELD': 'email',
-    # 'PASSWORD_RESET_CONFIRM_URL': False,
-    # 'USERNAME_RESET_CONFIRM_URL': False,
-    # 'ACTIVATION_URL': False,
-    # 'LOGOUT_ON_PASSWORD_CHANGE': False,  # Default: False
+    'LOGOUT_ON_PASSWORD_CHANGE': True,
+    'HIDE_USERS': False,
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.AllowAny'],
         'user_list': ['rest_framework.permissions.AllowAny'],
@@ -149,12 +144,16 @@ DJOSER = {
     },
     'SERIALIZERS': {
         'user': 'api.serializers.UserSerializer',
-        'user_list': 'api.serializers.UserSerializer',
-        'user_create': 'api.serializers.UserSerializer',
-        # 'user': 'djoser.serializers.UserSerializer',
-    }
-}
+        'user_create': 'api.serializers.UserCreateSerializer',
+        'current_user': 'api.serializers.UserSerializer',
 
+        # 'user': 'api.serializers.UserSerializer',
+        # 'user_create': 'api.serializers.UserSerializer',
+        # 'user_list': 'api.serializers.UserSerializer',
+        # 'user_create': 'api.serializers.UserSerializer',
+        # 'user': 'djoser.serializers.UserSerializer',
+    },
+}
 
 
 AUTH_USER_MODEL = 'foodgram.User'

@@ -17,15 +17,11 @@ from foodgram.models import User
 # from .filters import TitleFilter
 # from .permissions import
 
-from .serializers import UserSerializer, MeUserSerializer
 
-
-class UserViewSet(viewsets.ModelViewSet):
-# class UserViewSet(DjoserUserViewSet):
+class UserViewSet(DjoserUserViewSet):
     """Управление пользователями."""
     # lookup_field = 'username'
     queryset = User.objects.all()
-    serializer_class = UserSerializer
     # permission_classes = (IsAdministrator,)
     # filter_backends = (filters.SearchFilter,)
     # search_fields = ('username',)
@@ -42,4 +38,3 @@ class UserViewSet(viewsets.ModelViewSet):
     #     user = request.user
     #     serializer = self.get_serializer(user)
     #     return Response(serializer.data, status=status.HTTP_200_OK)
-
