@@ -1,7 +1,7 @@
 # api/permissions.py
 
 from rest_framework.permissions import (
-    BasePermission, SAFE_METHODS, IsAuthenticatedOrReadOnly
+    BasePermission, SAFE_METHODS
 )
 
 

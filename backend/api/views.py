@@ -12,10 +12,11 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from djoser.views import UserViewSet as DjoserUserViewSet
 
-from foodgram.models import User
+from foodgram.models import User, Ingredient
 
+from .serializers import IngredientSerializer
 # from .filters import TitleFilter
-# from .permissions import
+# from .permissions import ReadOnly
 
 
 class UserViewSet(DjoserUserViewSet):
@@ -38,3 +39,9 @@ class UserViewSet(DjoserUserViewSet):
     #     user = request.user
     #     serializer = self.get_serializer(user)
     #     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = IngredientSerializer
+    queryset = Ingredient.objects.all()
+    pagination_class = None
