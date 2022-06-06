@@ -100,7 +100,7 @@ class Ingredient(models.Model):
     name = models.CharField(
         _('Название ингредиента'),
         max_length=200,
-        unique=True,
+        # unique=True, # не уникальные !!!
     )
     measurement_unit = models.CharField(
         _('Единица измерения ингредиента'),

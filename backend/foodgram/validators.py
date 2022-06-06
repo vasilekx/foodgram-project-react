@@ -15,7 +15,7 @@ def validate_username(value):
 
 
 def validate_tag_color(value):
-    regex, inverse_match = value
+    regex, inverse_match = settings.COLORS_HEX_REGEX
     RegexValidator(
         regex=regex,
         message=_(f'{value} - недопустимый код цвета.'),

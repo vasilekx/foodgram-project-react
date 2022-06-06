@@ -121,6 +121,9 @@ REST_FRAMEWORK = {
     # custom pagination
     'DEFAULT_PAGINATION_CLASS': 'api.pagination.FoodgramPagination',
     'PAGE_SIZE': 10,
+
+    # 'SEARCH_PARAM': 'search', # def
+    'SEARCH_PARAM': 'name',  # For Ingredient
 }
 
 DJOSER = {

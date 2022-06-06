@@ -8,7 +8,7 @@ from djoser.serializers import (
     UserSerializer as DjoserUserSerializer
 )
 
-from foodgram.models import User, Ingredient
+from foodgram.models import User, Ingredient, Tag
 from foodgram.validators import validate_username
 
 
@@ -52,3 +52,11 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit',)
         read_only_fields = ('id', 'name', 'measurement_unit',)
+
+
+class TagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = ('id', 'name', 'color', 'slug',)
+        read_only_fields = ('id', 'name', 'color', 'slug',)

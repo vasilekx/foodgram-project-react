@@ -4,13 +4,14 @@ from django.urls import include, path
 from rest_framework import routers
 # from rest_framework.authtoken import views
 
-from .views import (UserViewSet, IngredientViewSet)
+from .views import (UserViewSet, IngredientViewSet, TagViewSet)
 
 app_name = 'api'
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet, basename='users')
 router.register(r'ingredients', IngredientViewSet, basename='ingredients')
+router.register(r'tags', TagViewSet, basename='tags')
 
 # router.register(
 #     r'titles/(?P<title_id>\d+)/reviews',
