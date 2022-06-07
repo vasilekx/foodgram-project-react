@@ -12,9 +12,15 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from djoser.views import UserViewSet as DjoserUserViewSet
 
-from foodgram.models import User, Ingredient, Tag
+from foodgram.models import User, Ingredient, Tag, Recipe
 
-from .serializers import IngredientSerializer, TagSerializer
+from .serializers import (
+    IngredientSerializer,
+    TagSerializer,
+    RecipeCreateSerializer,
+    RecipeGetSerializer
+)
+
 # from .filters import TitleFilter
 # from .permissions import ReadOnly
 
@@ -42,8 +48,8 @@ class UserViewSet(DjoserUserViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
     pagination_class = None
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('^name', 'name',)
@@ -53,3 +59,18 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
     pagination_class = None
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeGetSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH',):
+            return RecipeCreateSerializer
+        return self.serializer_class
+
+

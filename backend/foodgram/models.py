@@ -175,6 +175,7 @@ class Recipe(models.Model):
         ],
         help_text=_('Время приготовления (в минутах)')
     )
+    tags = models.ManyToManyField(Tag, through='RecipeTag')
     # image = ...
     # tags = models.ForeignKey(
     #     Tag,
@@ -199,28 +200,28 @@ class RecipeTag(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.SET_NULL,
-        related_name='tags',
+        # related_name='tags',
         verbose_name=_('Рецепт'),
         null=True,
         help_text=_('Рецепт, к которому будет относиться тег'),
     )
-    tags = models.ForeignKey(
+    tag = models.ForeignKey(
         Tag,
         on_delete=models.SET_NULL,
-        related_name='recipes',
+        # related_name='recipes',
         verbose_name=_('Тег'),
         null=True,
         help_text=_('Тег, к которому будет относиться рецепт'),
     )
 
     def __str__(self):
-        return f'{self.recipe} has {self.tags}'
+        return f'{self.recipe} has {self.tag}'
 
     class Meta:
         verbose_name = _('Тег рецепта')
         verbose_name_plural = _('Теги рецепта')
         constraints = [
-            models.UniqueConstraint(fields=['recipe', 'tags'],
+            models.UniqueConstraint(fields=['recipe', 'tag'],
                                     name='unique_relationships'),
         ]
 

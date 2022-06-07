@@ -7,8 +7,9 @@ from djoser.serializers import (
     UserCreateSerializer as DjoserUserCreateSerializer,
     UserSerializer as DjoserUserSerializer
 )
+from rest_framework.generics import get_object_or_404
 
-from foodgram.models import User, Ingredient, Tag
+from foodgram.models import User, Ingredient, Tag, Recipe, RecipeTag
 from foodgram.validators import validate_username
 
 
@@ -60,3 +61,59 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ('id', 'name', 'color', 'slug',)
         read_only_fields = ('id', 'name', 'color', 'slug',)
+
+
+class CreateRecipeTagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = ('id',)
+        read_only_fields = ('id',)
+
+
+class RecipeCreateSerializer(serializers.ModelSerializer):
+    # author = serializers.SlugRelatedField(
+    #     slug_field='username',
+    #     read_only=True,
+    #     default=serializers.CurrentUserDefault()
+    # )
+
+    # tags = serializers.PrimaryKeyRelatedField(many=True,
+    #                                           queryset=Tag.objects.all())
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'text', 'author', 'cooking_time', 'tags')
+        read_only_fields = ('author',)
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        for tag in tags:
+            # Создадим новую запись или получим существующий экземпляр из БД
+            pk = tag.pk
+            # current_tag = Tag.objects.get(pk=tag.pk)
+            current_tag = get_object_or_404(Tag, pk=tag.pk)
+            # Поместим ссылку на каждое достижение во вспомогательную таблицу
+            # Не забыв указать к какому котику оно относится
+            RecipeTag.objects.create(
+                recipe=recipe, tag=current_tag)
+        return recipe
+
+    # def update(self, instance, validated_data):
+    #     return 0
+
+
+class RecipeGetSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+        default=serializers.CurrentUserDefault()
+    )
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'text', 'author', 'cooking_time', 'tags')
+        read_only_fields = ('author',)
