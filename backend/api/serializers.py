@@ -1,6 +1,7 @@
 # api/serializers.py
 
 from django.conf import settings
+from django.shortcuts import get_list_or_404
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from djoser.serializers import (
@@ -23,7 +24,6 @@ class MixinUserSerializer:
             'id', 'email', 'username', 'first_name', 'last_name', 'password',
 
         )
-        read_only_fields = ('is_subscribed',)
 
 
 class UserSerializer(MixinUserSerializer, DjoserUserSerializer):
@@ -32,6 +32,7 @@ class UserSerializer(MixinUserSerializer, DjoserUserSerializer):
 
     class Meta(MixinUserSerializer.Meta):
         fields = MixinUserSerializer.Meta.fields + ('is_subscribed',)
+        read_only_fields = ('is_subscribed',)
 
     def get_is_subscribed(self, obj):
         return False
@@ -63,57 +64,115 @@ class TagSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'name', 'color', 'slug',)
 
 
-class CreateRecipeTagSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Tag
-        fields = ('id',)
-        read_only_fields = ('id',)
-
-
-class RecipeCreateSerializer(serializers.ModelSerializer):
-    # author = serializers.SlugRelatedField(
-    #     slug_field='username',
-    #     read_only=True,
-    #     default=serializers.CurrentUserDefault()
-    # )
-
-    # tags = serializers.PrimaryKeyRelatedField(many=True,
-    #                                           queryset=Tag.objects.all())
-    tags = TagSerializer(many=True)
+class RecipeSerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'text', 'author', 'cooking_time', 'tags')
-        read_only_fields = ('author',)
+        fields = ('id', 'name', 'text', 'author', 'cooking_time', 'tags',
+                  'is_favorited', 'is_in_shopping_cart',)
+        read_only_fields = ('is_favorited', 'is_in_shopping_cart',)
+
+    def get_is_favorited(self, obj):
+        return False
+
+    def get_is_in_shopping_cart(self, obj):
+        return False
+
+
+class RecipeCreateSerializer(RecipeSerializer):
+    tags = serializers.PrimaryKeyRelatedField(many=True,
+                                              queryset=Tag.objects.all())
+
+    def to_representation(self, instance):
+        data = super(RecipeCreateSerializer, self).to_representation(instance)
+        data['tags'] = TagSerializer(instance=instance.tags, many=True).data
+        return data
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         for tag in tags:
-            # Создадим новую запись или получим существующий экземпляр из БД
-            pk = tag.pk
-            # current_tag = Tag.objects.get(pk=tag.pk)
             current_tag = get_object_or_404(Tag, pk=tag.pk)
-            # Поместим ссылку на каждое достижение во вспомогательную таблицу
-            # Не забыв указать к какому котику оно относится
             RecipeTag.objects.create(
                 recipe=recipe, tag=current_tag)
         return recipe
 
-    # def update(self, instance, validated_data):
-    #     return 0
+    def update(self, instance, validated_data):
+        # tags = validated_data.pop('tags')
+        v_d = validated_data
+        tags_data = validated_data.pop('tags')
+        tags = (instance.tags).all()
+        tags = list(tags)
+        # for key, value in validated_data.items():
+        #     setattr(instance, key, value)
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get('cooking_time',
+                                                   instance.cooking_time)
+        instance.save()
+
+        keep_tags = []
 
 
-class RecipeGetSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True,
-        default=serializers.CurrentUserDefault()
-    )
-    tags = TagSerializer(many=True)
 
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'text', 'author', 'cooking_time', 'tags')
-        read_only_fields = ('author',)
+        # tag_mapping = {tag.id: tag for tag in instance.tags}
+        # print(tag_mapping)
+
+        # data_mapping = {tag.id: tag for tag in tags}
+        # print(data_mapping)
+
+
+        # https://clck.ru/qCEtt
+
+        #book_mapping = {book.id: book for book in instance}
+        #data_mapping = {item['id']: item for item in validated_data}
+        ## Perform creations and updates.
+        #ret = []
+
+        #for book_id, data in data_mapping.items():
+        #    book = book_mapping.get(book_id, None)
+        #    if book is None:
+        #        ret.append(self.child.create(data))
+        #    else:
+        #        ret.append(self.child.update(book, data))
+
+        ## Perform deletions.
+        #for book_id, book in book_mapping.items():
+        #    if book_id not in data_mapping:
+        #        book.delete()
+
+
+        # for Ingredient
+
+        # def update(self, instance, validated_data):
+        #     choices = validated_data.pop('choices')
+        #     instance.title = validated_data.get("title", instance.title)
+        #     instance.save()
+        #     keep_choices = []
+        #     for choice in choices:
+        #         if "id" in choice.keys():
+        #             if Choice.objects.filter(id=choice["id"]).exists():
+        #                 c = Choice.objects.get(id=choice["id"])
+        #                 c.text = choice.get('text', c.text)
+        #                 c.save()
+        #                 keep_choices.append(c.id)
+        #             else:
+        #                 continue
+        #         else:
+        #             c = Choice.objects.create(**choice, question=instance)
+        #             keep_choices.append(c.id)
+        #
+        #     for choice in instance.choices:
+        #         if choice.id not in keep_choices:
+        #             choice.delete()
+
+
+
+        return instance
+
+
+

@@ -18,7 +18,7 @@ from .serializers import (
     IngredientSerializer,
     TagSerializer,
     RecipeCreateSerializer,
-    RecipeGetSerializer
+    RecipeSerializer
 )
 
 # from .filters import TitleFilter
@@ -63,7 +63,9 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeGetSerializer
+    serializer_class = RecipeSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete',
+                         'head', 'options', 'trace']
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
