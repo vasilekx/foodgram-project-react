@@ -22,7 +22,7 @@ from .serializers import (
 )
 
 # from .filters import TitleFilter
-# from .permissions import ReadOnly
+from .permissions import IsOwnerOrReadOnly
 
 
 class UserViewSet(DjoserUserViewSet):
@@ -64,6 +64,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    permission_classes = (IsOwnerOrReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete',
                          'head', 'options', 'trace']
 

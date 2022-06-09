@@ -176,16 +176,8 @@ class Recipe(models.Model):
         help_text=_('Время приготовления (в минутах)')
     )
     tags = models.ManyToManyField(Tag, through='RecipeTag')
+    ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
     # image = ...
-    # tags = models.ForeignKey(
-    #     Tag,
-    #     on_delete=models.SET_NULL,
-    #     related_name='recipes',
-    #     verbose_name=_('Рецепт'),
-    #     null=True,
-    #     help_text=_('Тег, к которому будет относиться рецепт'),
-    # )
-    # ingredients = ...
 
     def __str__(self):
         return '{:.15}'.format(self.name)
@@ -207,7 +199,7 @@ class RecipeTag(models.Model):
     )
     tag = models.ForeignKey(
         Tag,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         # related_name='recipes',
         verbose_name=_('Тег'),
         null=True,
@@ -231,14 +223,14 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='ingredients',
+        # related_name='ingredients',
         verbose_name=_('Рецепт'),
         help_text=_('Рецепт, к которому будет относиться ингредиент'),
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.SET_NULL,
-        related_name='recipes',
+        # related_name='recipes',
         verbose_name=_('Ингредиент'),
         null=True,
         help_text=_('Ингредиент, к которому будет относиться рецепт'),
@@ -258,6 +250,7 @@ class RecipeIngredient(models.Model):
     class Meta:
         verbose_name = _('Ингредиент рецепта')
         verbose_name_plural = _('Ингредиенты рецепта')
+        # UniqueConstraint ??
 
 
 # class избранный рецепт  favorite recipe http://127.0.0.1/api/recipes/{id}/favorite/

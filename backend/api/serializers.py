@@ -9,6 +9,7 @@ from djoser.serializers import (
     UserSerializer as DjoserUserSerializer
 )
 from rest_framework.generics import get_object_or_404
+from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from foodgram.models import User, Ingredient, Tag, Recipe, RecipeTag
 from foodgram.validators import validate_username
@@ -84,13 +85,21 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(RecipeSerializer):
-    tags = serializers.PrimaryKeyRelatedField(many=True,
-                                              queryset=Tag.objects.all())
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Tag.objects.all(),
+    )
 
     def to_representation(self, instance):
         data = super(RecipeCreateSerializer, self).to_representation(instance)
         data['tags'] = TagSerializer(instance=instance.tags, many=True).data
         return data
+
+    def validate_tags(self, value):
+        """Проверка дублирования тегов."""
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError('Недопустимо дублирование тегов!')
+        return value
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -102,20 +111,24 @@ class RecipeCreateSerializer(RecipeSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        # tags = validated_data.pop('tags')
-        v_d = validated_data
-        tags_data = validated_data.pop('tags')
-        tags = (instance.tags).all()
-        tags = list(tags)
-        # for key, value in validated_data.items():
-        #     setattr(instance, key, value)
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get('cooking_time',
-                                                   instance.cooking_time)
-        instance.save()
+        tags_data: list = validated_data.pop('tags')
+        tags: list = list(instance.tags.all())
 
-        keep_tags = []
+        for tag in tags_data:
+            if tag in tags:
+                tags.remove(tag)
+                print(tags)
+            else:
+                RecipeTag.objects.create(recipe=instance, tag=tag)
+
+        if tags:
+            for tag in tags:
+                get_object_or_404(
+                    RecipeTag,
+                    recipe=instance,
+                    tag=tag
+                ).delete()
+
 
 
 
@@ -170,9 +183,4 @@ class RecipeCreateSerializer(RecipeSerializer):
         #         if choice.id not in keep_choices:
         #             choice.delete()
 
-
-
-        return instance
-
-
-
+        return super(RecipeCreateSerializer, self).update(instance, validated_data)
