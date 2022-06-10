@@ -12,13 +12,14 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from djoser.views import UserViewSet as DjoserUserViewSet
 
-from foodgram.models import User, Ingredient, Tag, Recipe
+from foodgram.models import User, Ingredient, Tag, Recipe, RecipeIngredient
 
 from .serializers import (
     IngredientSerializer,
     TagSerializer,
     RecipeCreateSerializer,
-    RecipeSerializer
+    RecipeSerializer,
+    RecipeIngredientSerializer
 )
 
 # from .filters import TitleFilter
@@ -53,6 +54,12 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('^name', 'name',)
+
+
+# class RecipeIngredientViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = RecipeIngredient.objects.all()
+#     serializer_class = RecipeIngredientSerializer
+#     pagination_class = None
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):

@@ -11,7 +11,11 @@ from djoser.serializers import (
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
-from foodgram.models import User, Ingredient, Tag, Recipe, RecipeTag
+from foodgram.models import (
+    Ingredient, Tag,
+    Recipe, RecipeTag, RecipeIngredient,
+    User
+)
 from foodgram.validators import validate_username
 
 
@@ -57,6 +61,14 @@ class IngredientSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'name', 'measurement_unit',)
 
 
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ('id', 'ingredient', 'amount',)
+        read_only_fields = ('id', 'ingredient', 'amount',)
+
+
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -68,13 +80,14 @@ class TagSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
+    ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'text', 'author', 'cooking_time', 'tags',
-                  'is_favorited', 'is_in_shopping_cart',)
+                  'ingredients', 'is_favorited', 'is_in_shopping_cart',)
         read_only_fields = ('is_favorited', 'is_in_shopping_cart',)
 
     def get_is_favorited(self, obj):
@@ -89,6 +102,7 @@ class RecipeCreateSerializer(RecipeSerializer):
         many=True,
         queryset=Tag.objects.all(),
     )
+    # ingredients =
 
     def to_representation(self, instance):
         data = super(RecipeCreateSerializer, self).to_representation(instance)
