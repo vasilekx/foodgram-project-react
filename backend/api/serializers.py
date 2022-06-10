@@ -27,7 +27,6 @@ class MixinUserSerializer:
         model = User
         fields = (
             'id', 'email', 'username', 'first_name', 'last_name', 'password',
-
         )
 
 
@@ -53,6 +52,14 @@ class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
         return value
 
 
+class TagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = ('id', 'name', 'color', 'slug',)
+        read_only_fields = ('id', 'name', 'color', 'slug',)
+
+
 class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -62,32 +69,51 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        source='ingredient'
+    )
+    name = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='name',
+        source='ingredient'
+    )
+    measurement_unit = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='measurement_unit',
+        source='ingredient'
+    )
 
     class Meta:
         model = RecipeIngredient
-        fields = ('id', 'ingredient', 'amount',)
-        read_only_fields = ('id', 'ingredient', 'amount',)
-
-
-class TagSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Tag
-        fields = ('id', 'name', 'color', 'slug',)
-        read_only_fields = ('id', 'name', 'color', 'slug',)
+        fields = ('id', 'name', 'measurement_unit', 'amount',)
+        # read_only_fields = ( 'amount',)
 
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+    ingredients = RecipeIngredientSerializer(
+        many=True,
+        read_only=True,
+        source='recipeingredient_set'
+    )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'text', 'author', 'cooking_time', 'tags',
-                  'ingredients', 'is_favorited', 'is_in_shopping_cart',)
+        fields = (
+            'id',
+            'ingredients',
+            'name',
+            'text',
+            'author',
+            'tags',
+            'cooking_time',
+            'is_favorited',
+            'is_in_shopping_cart',
+        )
         read_only_fields = ('is_favorited', 'is_in_shopping_cart',)
 
     def get_is_favorited(self, obj):

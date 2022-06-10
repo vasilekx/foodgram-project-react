@@ -175,8 +175,16 @@ class Recipe(models.Model):
         ],
         help_text=_('Время приготовления (в минутах)')
     )
-    tags = models.ManyToManyField(Tag, through='RecipeTag')
-    ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
+    tags = models.ManyToManyField(
+        Tag,
+        through='RecipeTag',
+        through_fields=('recipe', 'tag')
+    )
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='RecipeIngredient',
+        through_fields=('recipe', 'ingredient')
+    )
     # image = ...
 
     def __str__(self):
@@ -230,7 +238,7 @@ class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.SET_NULL,
-        # related_name='recipes',
+        # related_name='recipes', # recipeingredient_set
         verbose_name=_('Ингредиент'),
         null=True,
         help_text=_('Ингредиент, к которому будет относиться рецепт'),
