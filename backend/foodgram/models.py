@@ -86,6 +86,7 @@ class Follow(models.Model):
         )
 
     class Meta:
+        ordering = ['user']
         verbose_name = _('Подписка')
         verbose_name_plural = _('Подписки')
         constraints = [
@@ -191,6 +192,7 @@ class Recipe(models.Model):
         return '{:.15}'.format(self.name)
 
     class Meta:
+        ordering = ['-id']
         verbose_name = _('Рецепт')
         verbose_name_plural = _('Рецепты')
 

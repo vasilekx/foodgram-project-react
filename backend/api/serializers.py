@@ -52,6 +52,42 @@ class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
         return value
 
 
+class FollowSerializer(serializers.Serializer):
+    email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Follow
+        fields = ('id', 'email', 'username', 'first_name',
+                  'last_name', 'is_subscribed', 'recipes', 'recipes_count')
+
+    def get_is_subscribed(self, obj):
+        request_user = self.context.get('request').user.id
+        queryset = Follow.objects.filter(
+            user=request_user,
+            author=obj.author
+        ).exists()
+        return queryset
+
+    def get_recipes_count(self, obj):
+        return obj.author.recipes.count()
+
+    # def get_is_subscribed(self):
+    #     pass
+    #
+    # def get_recipes_count(self):
+    #     pass
+
+    def get_recipes(self, obj):
+        return None
+
+
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -139,15 +175,14 @@ class RecipeCreateSerializer(RecipeSerializer):
         many=True,
         queryset=Tag.objects.all(),
     )
-    # ingredients = RecipeIngredientCreateSerializer(
-    #     many=True,
-    #     # source='recipeingredient_set'
-    # )
-    # ingredients = RecipeIngredientSerializer(
-    #     many=True,
-    #     read_only=True,
-    #     source='recipeingredient_set'
-    # )
+    ingredients = RecipeIngredientCreateSerializer(
+        many=True,
+    )
+
+    def validate(self, attrs):
+        print('validate')
+        print(self.initial_data)
+        return attrs
 
     def to_representation(self, instance):
         print(instance)
@@ -280,17 +315,3 @@ class RecipeCreateSerializer(RecipeSerializer):
         return super(RecipeCreateSerializer, self).update(instance, validated_data)
 
 
-# class FollowSerializer(serializers.ModelSerializer):
-#     user = serializers.SlugRelatedField(
-#         slug_field='username',
-#         read_only=True,
-#     )
-#     author = serializers.SlugRelatedField(
-#         slug_field='username',
-#         read_only=True,
-#     )
-#
-#     class Meta:
-#         model = Follow
-#         fields = '__all__'
-#         read_only_fields = ('__all__',)

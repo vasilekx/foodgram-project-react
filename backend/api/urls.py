@@ -6,7 +6,7 @@ from rest_framework import routers
 
 from .views import (
     UserViewSet, IngredientViewSet, TagViewSet, RecipeViewSet,
-    FollowViewSet,
+    # FollowViewSet,
 )
 
 app_name = 'api'

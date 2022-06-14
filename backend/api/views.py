@@ -12,7 +12,9 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from djoser.views import UserViewSet as DjoserUserViewSet
 
-from foodgram.models import User, Ingredient, Tag, Recipe, RecipeIngredient
+from foodgram.models import (User, Ingredient, Tag, Recipe, RecipeIngredient,
+                             Follow)
+
 
 from .serializers import (
     IngredientSerializer,
@@ -54,24 +56,55 @@ class UserViewSet(DjoserUserViewSet):
     @action(
         methods=['post', 'delete'],
         detail=True,
-        # url_path='me',
+        url_path='subscribe',
         # url_name='users_detail',
         permission_classes=[permissions.IsAuthenticated],
         # serializer_class=MeUserSerializer,
     )
-    def subscribe(self, request):
-        author = get_object_or_404()
+    def subscribes(self, request):
+        author = get_object_or_404(User, id=self.kwargs.get('user_id'))
         if request.method == 'POST':
-            serializer = self.get_serializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            if_already_exists = Follow.objects.filter(
+                user=request.user,
+                author=author,
+            ).exists()
+            if if_already_exists or request.user == author:
+                return Response(
+                    {
+                        'errors': ('Вы уже подписаны или пытаетесь '
+                                   'подписатьсяна самого себя.')
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            new_sub = Follow.objects.create(
+                user=request.user,
+                author=author,
+            )
+            serializer = FollowSerializer(
+                new_sub,
+                context={'request': request}
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        get_object_or_404(Follow,
+                          user=request.user,
+                          author=author).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated],
+        serializer_class=FollowSerializer,
+    )
+    def subscriptions(self, request):
+        user = request.user.follower.all()
+        page = self.paginate_queryset(user)
         serializer = self.get_serializer(
-            user,
-            data=request.data,
-            partial=True
+            page,
+            many=True,
+            context={'request': request}
         )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(serializer.data)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
