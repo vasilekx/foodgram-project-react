@@ -24,8 +24,8 @@ class RecipeAdmin(admin.ModelAdmin):
     # list_display_links = ('name', 'text', 'get_tags')
                     # 'tags', 'ingredients')
     # list_editable = ('get_tags',)
-    search_fields = ('name', 'author__username',)
-    list_filter = ('author', 'name',)
+    search_fields = ('name', 'author__username')
+    list_filter = ('author', 'name', 'tags__name')
     empty_value_display = '-пусто-'
     inlines = (RecipeTagInline, RecipeIngredientInline,)
 
@@ -53,12 +53,25 @@ class IngredientAdmin(admin.ModelAdmin):
     list_filter = ('name',)
     empty_value_display = '-пусто-'
 
+
+@admin.register(RecipeIngredient)
+class RecipeIngredientAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'recipe_pk',  'recipe', 'ingredient', 'amount')
+    empty_value_display = '-пусто-'
+
+    def recipe_pk(self, obj):
+        return obj.recipe.pk
+
+    recipe_pk.admin_order_field = 'recipe__pk'
+    recipe_pk.short_description = _('Ключ рецепта')
+
+
 # admin.site.register(User)
 admin.site.register(Follow)
 # admin.site.register(Ingredient)
 admin.site.register(Tag)
 # admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(RecipeTag)
-admin.site.register(RecipeIngredient)
+# admin.site.register(RecipeIngredient)
 admin.site.register(Favorite)
 admin.site.register(ShoppingCart)

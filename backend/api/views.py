@@ -19,11 +19,12 @@ from .serializers import (
     TagSerializer,
     RecipeCreateSerializer,
     RecipeSerializer,
-    RecipeIngredientSerializer
+    FollowSerializer
 )
 
 # from .filters import TitleFilter
 from .permissions import IsOwnerOrReadOnly
+from .viewsets import CreateDestroyListViewSet
 
 
 class UserViewSet(DjoserUserViewSet):
@@ -47,6 +48,31 @@ class UserViewSet(DjoserUserViewSet):
     #     serializer = self.get_serializer(user)
     #     return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def subscribe(self):
+        pass
+
+    @action(
+        methods=['post', 'delete'],
+        detail=True,
+        # url_path='me',
+        # url_name='users_detail',
+        permission_classes=[permissions.IsAuthenticated],
+        # serializer_class=MeUserSerializer,
+    )
+    def subscribe(self, request):
+        author = get_object_or_404()
+        if request.method == 'POST':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = self.get_serializer(
+            user,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
@@ -54,12 +80,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('^name', 'name',)
-
-
-# class RecipeIngredientViewSet(viewsets.ReadOnlyModelViewSet):
-#     queryset = RecipeIngredient.objects.all()
-#     serializer_class = RecipeIngredientSerializer
-#     pagination_class = None
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -84,3 +104,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return self.serializer_class
 
 
+# class FollowViewSet(viewsets.ModelViewSet):
+#     serializer_class = FollowSerializer
+#     permission_classes = (IsOwnerOrReadOnly,)
+#     # filter_backends = (filters.SearchFilter,)
+#     # search_fields = ('following__username',)
+#
+#     def get_user(self):
+#         return get_object_or_404(User, pk=self.kwargs.get('user_id'))
+#
+#     def get_queryset(self):
+#         return self.request.user.follower.all()
+#
+#     def perform_create(self, serializer):
+#         serializer.save(user=self.request.user, author=self.get_user())
+#
+#     def perform_destroy(self, instance):
+#         instance.delete()

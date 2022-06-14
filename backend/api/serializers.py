@@ -12,7 +12,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from foodgram.models import (
-    Ingredient, Tag,
+    Ingredient, Tag, Follow,
     Recipe, RecipeTag, RecipeIngredient,
     User
 )
@@ -123,16 +123,48 @@ class RecipeSerializer(serializers.ModelSerializer):
         return False
 
 
+class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        # source='ingredient',
+        queryset=Ingredient.objects.all(),
+    )
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ('id', 'amount',)
+
+
 class RecipeCreateSerializer(RecipeSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all(),
     )
-    # ingredients =
+    # ingredients = RecipeIngredientCreateSerializer(
+    #     many=True,
+    #     # source='recipeingredient_set'
+    # )
+    # ingredients = RecipeIngredientSerializer(
+    #     many=True,
+    #     read_only=True,
+    #     source='recipeingredient_set'
+    # )
 
     def to_representation(self, instance):
+        print(instance)
+        print(type(instance))
+
+        print(instance.tags)
+        print(type(instance.tags))
+
+        print(instance.ingredients)
+        print(type(instance.ingredients))
+
         data = super(RecipeCreateSerializer, self).to_representation(instance)
         data['tags'] = TagSerializer(instance=instance.tags, many=True).data
+        data['ingredients'] = RecipeIngredientSerializer(
+            instance=instance.ingredients,
+            many=True
+        ).data
         return data
 
     def validate_tags(self, value):
@@ -143,11 +175,33 @@ class RecipeCreateSerializer(RecipeSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
+        print(validated_data)
+        ingredients = validated_data.pop('ingredients')
+        print(ingredients)
+
+        ingredients_list = [dict(ingredient) for ingredient in ingredients]
+        print(ingredients_list)
+        print(ingredients_list)
         recipe = Recipe.objects.create(**validated_data)
         for tag in tags:
             current_tag = get_object_or_404(Tag, pk=tag.pk)
             RecipeTag.objects.create(
-                recipe=recipe, tag=current_tag)
+                recipe=recipe,
+                tag=current_tag
+            )
+
+        for recipe_ingredient in ingredients_list:
+            ingredient = recipe_ingredient.get('id')
+            print(type(id))
+            print(id)
+            amount = recipe_ingredient.get('amount')
+            print(type(amount))
+            print(amount)
+            RecipeIngredient.objects.create(
+                recipe=recipe,
+                ingredient=recipe_ingredient.get('id'),
+                amount=recipe_ingredient.get('amount')
+            )
         return recipe
 
     def update(self, instance, validated_data):
@@ -224,3 +278,19 @@ class RecipeCreateSerializer(RecipeSerializer):
         #             choice.delete()
 
         return super(RecipeCreateSerializer, self).update(instance, validated_data)
+
+
+# class FollowSerializer(serializers.ModelSerializer):
+#     user = serializers.SlugRelatedField(
+#         slug_field='username',
+#         read_only=True,
+#     )
+#     author = serializers.SlugRelatedField(
+#         slug_field='username',
+#         read_only=True,
+#     )
+#
+#     class Meta:
+#         model = Follow
+#         fields = '__all__'
+#         read_only_fields = ('__all__',)
