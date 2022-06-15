@@ -183,9 +183,13 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
+    # id = serializers.PrimaryKeyRelatedField(
+    #     # source='ingredient',
+    #     queryset=Ingredient.objects.all(),
+    # )
     id = serializers.PrimaryKeyRelatedField(
-        # source='ingredient',
-        queryset=Ingredient.objects.all(),
+        # read_only=True,
+        source='ingredient'
     )
 
     class Meta:
@@ -198,8 +202,12 @@ class RecipeCreateSerializer(RecipeSerializer):
         many=True,
         queryset=Tag.objects.all(),
     )
+    # ingredients = RecipeIngredientCreateSerializer(
+    #     many=True,
+    # )
     ingredients = RecipeIngredientCreateSerializer(
         many=True,
+        source='recipeingredient_set'
     )
 
     def validate(self, attrs):
@@ -335,6 +343,5 @@ class RecipeCreateSerializer(RecipeSerializer):
         #         if choice.id not in keep_choices:
         #             choice.delete()
 
-        return super(RecipeCreateSerializer, self).update(instance, validated_data)
-
-
+        return super(RecipeCreateSerializer, self).update(instance,
+                                                          validated_data)
