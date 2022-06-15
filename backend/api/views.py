@@ -55,18 +55,24 @@ class UserViewSet(DjoserUserViewSet):
         serializer_class=FollowSerializer,
     )
     def subscribe(self, request, id=None):
-        print(id)
-        print(self.kwargs.get('user_id'))
         author = get_object_or_404(User, id=id)
-        if request.method == 'DELETE':
-            get_object_or_404(Follow,
-                              user=request.user,
-                              author=author).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
         if_already_exists = Follow.objects.filter(
             user=request.user,
             author=author,
         ).exists()
+        if request.method == 'DELETE':
+            if not if_already_exists:
+                return Response(
+                    {
+                        'errors': ('Вы еще не подписаны!')
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            get_object_or_404(Follow,
+                              user=request.user,
+                              author=author).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
         if if_already_exists or request.user == author:
             return Response(
                 {
