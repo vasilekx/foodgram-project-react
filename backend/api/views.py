@@ -132,11 +132,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsOwner],
     )
     def favorite(self, request, pk=None):
-        # print(self)
-        # print(type(self))
-        # print(request)
-        # print(type(request))
-
         return create_or_delete_favorite_or_purchase_recipe(
             request=request,
             pk_object=pk,
@@ -147,46 +142,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
             delete_errors_message=_('Рецепт ещё не добавлен в избранное!')
         )
 
-        # favorite_recipe = get_object_or_404(Recipe, pk=pk)
-        # fields = {'user': request.user, 'recipe': favorite_recipe}
-        # if_already_exists = Favorite.objects.filter(**fields).exists()
-        # if request.method == 'DELETE':
-        #     return delete_object(
-        #         model=Favorite,
-        #         fields=fields,
-        #         exist=if_already_exists,
-        #         errors_message=_('Рецепт ещё не добавлен в избранное!'),
-        #     )
-        # return response_created_object(
-        #     model=Favorite,
-        #     fields=fields,
-        #     exist=if_already_exists,
-        #     errors_message=_('Рецепт уже добавлен в избранное!'),
-        #     serializer_class=FavoriteOrShoppingCartRecipeSerializer,
-        #     context={'request': request}
-        # )
-
     @action(
         methods=['post', 'delete'],
         detail=True,
         permission_classes=[IsOwner],
     )
     def shopping_cart(self, request, pk=None):
-        recipe_purchase = get_object_or_404(Recipe, pk=pk)
-        fields = {'user': request.user, 'recipe': recipe_purchase}
-        if_already_exists = ShoppingCart.objects.filter(**fields).exists()
-        if request.method == 'DELETE':
-            return delete_object(
-                model=ShoppingCart,
-                fields=fields,
-                exist=if_already_exists,
-                errors_message=_('Рецепт ещё не добавлен в список покупок!'),
-            )
-        return response_created_object(
-            model=ShoppingCart,
-            fields=fields,
-            exist=if_already_exists,
-            errors_message=_('Рецепт уже добавлен в список покупок!'),
+        return create_or_delete_favorite_or_purchase_recipe(
+            request=request,
+            pk_object=pk,
+            model_object=ShoppingCart,
+            model_recipe=Recipe,
             serializer_class=FavoriteOrShoppingCartRecipeSerializer,
-            context={'request': request}
+            post_errors_message=_('Рецепт уже добавлен в список покупок!'),
+            delete_errors_message=_('Рецепт ещё не добавлен в список покупок!')
         )
