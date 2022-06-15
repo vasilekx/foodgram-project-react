@@ -14,7 +14,7 @@ from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from foodgram.models import (
     Ingredient, Tag, Follow,
     Recipe, RecipeTag, RecipeIngredient,
-    User
+    User, Favorite, ShoppingCart
 )
 from foodgram.validators import validate_username
 
@@ -52,7 +52,22 @@ class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
         return value
 
 
-class SubscriptionsRecipeSerializer(serializers.ModelSerializer):
+class FavoriteRecipeSerializer(serializers.Serializer):
+    id = serializers.ReadOnlyField(source='recipes.id')
+    name = serializers.ReadOnlyField(source='recipes.name')
+    cooking_time = serializers.ReadOnlyField(source='recipes.cooking_time')
+    # image = serializers.ReadOnlyField(source='recipes.image')
+    test = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Favorite
+        fields = ('id', 'name', 'cooking_time',) # 'image'
+
+    def get_test(self, obj):
+        return False
+
+
+class FollowRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
@@ -93,7 +108,7 @@ class FollowSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         data = super(FollowSerializer, self).to_representation(instance)
-        data['recipes'] = SubscriptionsRecipeSerializer(
+        data['recipes'] = FollowRecipeSerializer(
             instance=data.get('recipes'),
             many=True
         ).data

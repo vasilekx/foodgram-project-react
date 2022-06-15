@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from djoser.views import UserViewSet as DjoserUserViewSet
 
 from foodgram.models import (User, Ingredient, Tag, Recipe, RecipeIngredient,
-                             Follow)
+                             Follow, Favorite)
 
 
 from .serializers import (
@@ -21,7 +21,8 @@ from .serializers import (
     TagSerializer,
     RecipeCreateSerializer,
     RecipeSerializer,
-    FollowSerializer
+    FollowSerializer,
+    FavoriteRecipeSerializer
 )
 
 from .permissions import IsOwnerOrReadOnly, IsOwner
@@ -121,3 +122,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if self.request.method in ('POST', 'PATCH',):
             return RecipeCreateSerializer
         return self.serializer_class
+
+    @action(
+        methods=['post', 'delete'],
+        detail=True,
+        permission_classes=[IsOwner],
+    )
+    def favorite(self, request, pk=None):
+        favorite_recipe = get_object_or_404(Recipe, pk=pk)
+        fields = {'user': request.user, 'recipe': favorite_recipe}
+        if_already_exists = Favorite.objects.filter(**fields).exists()
+        if request.method == 'DELETE':
+            return delete_object(
+                model=Favorite,
+                fields=fields,
+                exist=if_already_exists,
+                errors_message=_('Рецепт ещё не добавлен в избранное!'),
+            )
+        ser = self.get_serializer()
+        cl_ser = self.get_serializer_class()
+        return response_created_object(
+            model=Favorite,
+            fields=fields,
+            exist=if_already_exists,
+            errors_message=_('Рецепт уже добавлен в избранное!'),
+            serializer_class=FavoriteRecipeSerializer,
+            context={'request': request}
+        )

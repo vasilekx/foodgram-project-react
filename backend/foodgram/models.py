@@ -68,8 +68,6 @@ class Follow(models.Model):
         related_name='follower',
         verbose_name=_('Подписчик'),
         help_text=_('Пользователь, который подписывается.'),
-        # blank=True,
-        # null=True
     )
     author = models.ForeignKey(
         User,
@@ -101,7 +99,6 @@ class Ingredient(models.Model):
     name = models.CharField(
         _('Название ингредиента'),
         max_length=200,
-        # unique=True, # не уникальные !!!
     )
     measurement_unit = models.CharField(
         _('Единица измерения ингредиента'),
@@ -150,7 +147,6 @@ class Tag(models.Model):
         verbose_name_plural = _('Теги')
 
 
-# class Рецепты
 class Recipe(models.Model):
     name = models.CharField(
         _('Название'),
@@ -197,7 +193,6 @@ class Recipe(models.Model):
         verbose_name_plural = _('Рецепты')
 
 
-# class тег рецепта recipe tag
 class RecipeTag(models.Model):
     recipe = models.ForeignKey(
         Recipe,
@@ -228,7 +223,6 @@ class RecipeTag(models.Model):
         ]
 
 
-# class Ингредиент рецепта  Recipe ingredient
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
@@ -263,7 +257,6 @@ class RecipeIngredient(models.Model):
         # UniqueConstraint ??
 
 
-# class избранный рецепт  favorite recipe http://127.0.0.1/api/recipes/{id}/favorite/
 class Favorite(models.Model):
     user = models.ForeignKey(
         User,
@@ -284,11 +277,15 @@ class Favorite(models.Model):
         return f'{self.user} has {self.recipe}'
 
     class Meta:
+        ordering = ['user']
         verbose_name = _('Избранный рецепт')
         verbose_name_plural = _('Избранные рецепты')
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'recipe'],
+                                    name='unique_relationships')
+        ]
 
 
-# class купить рецепт buy recipe shopping cart
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
@@ -309,5 +306,10 @@ class ShoppingCart(models.Model):
         return f'{self.user} has {self.recipe}'
 
     class Meta:
+        ordering = ['user']
         verbose_name = _('Корзина')
         verbose_name_plural = _('Корзины')
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'recipe'],
+                                    name='unique_relationships')
+        ]

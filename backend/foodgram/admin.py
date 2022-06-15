@@ -68,10 +68,21 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 class FollowAdmin(admin.ModelAdmin):
     list_display = ('pk', 'user', 'author',)
     ordering = ('-pk',)
-    empty_value_display = '-пусто-'
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'user', 'recipe',)
+    ordering = ('-pk',)
+
+
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'user', 'recipe',)
+    ordering = ('-pk',)
 
 
 admin.site.register(Tag)
 admin.site.register(RecipeTag)
-admin.site.register(Favorite)
-admin.site.register(ShoppingCart)
+# admin.site.register(Favorite)
+# admin.site.register(ShoppingCart)

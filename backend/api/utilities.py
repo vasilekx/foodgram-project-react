@@ -12,7 +12,7 @@ from rest_framework import serializers
 
 
 def delete_object(model: ModelBase, fields: dict,
-               exist: bool, errors_message: str) -> Response:
+                  exist: bool, errors_message: str) -> Response:
     if not exist:
         return Response(
             {
@@ -25,9 +25,9 @@ def delete_object(model: ModelBase, fields: dict,
 
 
 def response_created_object(model: Type[Model], fields: dict,
-                         exist: bool, errors_message: str,
-                         serializer_class: serializers.SerializerMetaclass,
-                         context: dict) -> Response:
+                            exist: bool, errors_message: str,
+                            serializer_class: serializers.SerializerMetaclass,
+                            context: dict) -> Response:
     if exist:
         return Response(
             {
@@ -35,8 +35,11 @@ def response_created_object(model: Type[Model], fields: dict,
             },
             status=status.HTTP_400_BAD_REQUEST
         )
+    mf = model.objects.create(**fields)
     serializer = serializer_class(
-        model.objects.create(**fields),
+        mf, # model.objects.create(**fields),
         context=context
     )
+    s = serializer
+    sd = serializer.data
     return Response(serializer.data, status=status.HTTP_201_CREATED)
