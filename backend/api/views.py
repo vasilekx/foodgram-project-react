@@ -24,8 +24,8 @@ from .serializers import (
     FollowSerializer
 )
 
-from .permissions import IsOwnerOrReadOnly
-from .utilities import delete_obj, response_created_odj
+from .permissions import IsOwnerOrReadOnly, IsOwner
+from .utilities import delete_object, response_created_object
 
 
 class UserViewSet(DjoserUserViewSet):
@@ -52,7 +52,7 @@ class UserViewSet(DjoserUserViewSet):
     @action(
         methods=['post', 'delete'],
         detail=True,
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=[IsOwner],
         serializer_class=FollowSerializer,
     )
     def subscribe(self, request, pk=None):
@@ -60,13 +60,13 @@ class UserViewSet(DjoserUserViewSet):
         fields = {'user': request.user, 'author': author}
         if_already_exists = Follow.objects.filter(**fields).exists()
         if request.method == 'DELETE':
-            return delete_obj(
+            return delete_object(
                 model=Follow,
                 fields=fields,
                 exist=if_already_exists,
                 errors_message=_('Вы еще не подписаны!'),
             )
-        return response_created_odj(
+        return response_created_object(
             model=Follow,
             fields=fields,
             exist=bool(if_already_exists or request.user == author),
@@ -79,7 +79,7 @@ class UserViewSet(DjoserUserViewSet):
     @action(
         methods=['get'],
         detail=False,
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=[IsOwner],
         serializer_class=FollowSerializer,
     )
     def subscriptions(self, request):

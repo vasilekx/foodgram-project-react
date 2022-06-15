@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework import serializers
 
 
-def delete_obj(model: ModelBase, fields: dict,
+def delete_object(model: ModelBase, fields: dict,
                exist: bool, errors_message: str) -> Response:
     if not exist:
         return Response(
@@ -24,7 +24,7 @@ def delete_obj(model: ModelBase, fields: dict,
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-def response_created_odj(model: Type[Model], fields: dict,
+def response_created_object(model: Type[Model], fields: dict,
                          exist: bool, errors_message: str,
                          serializer_class: serializers.SerializerMetaclass,
                          context: dict) -> Response:

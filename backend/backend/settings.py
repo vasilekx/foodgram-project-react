@@ -106,7 +106,7 @@ DEFAULT_FROM_EMAIL = 'noreply@api.ru'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 
     # 'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -131,8 +131,8 @@ DJOSER = {
     'LOGOUT_ON_PASSWORD_CHANGE': True,
     'HIDE_USERS': False,
     'PERMISSIONS': {
-        'user': ['rest_framework.permissions.AllowAny'],
-        'user_list': ['rest_framework.permissions.AllowAny'],
+        'user': ['rest_framework.permissions.IsAuthenticated'],
+        'user_list': ['rest_framework.permissions.IsAuthenticated'],
         'user_create': ['rest_framework.permissions.AllowAny'],
 
         'token_create': ['rest_framework.permissions.AllowAny'],
