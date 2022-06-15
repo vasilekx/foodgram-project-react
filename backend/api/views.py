@@ -25,12 +25,13 @@ from .serializers import (
 )
 
 from .permissions import IsOwnerOrReadOnly
+from .utilities import delete_obj, response_created_odj
 
 
 class UserViewSet(DjoserUserViewSet):
     """Управление пользователями."""
-    # lookup_field = 'username'
     queryset = User.objects.all()
+    lookup_field = 'pk'
     # permission_classes = (IsAdministrator,)
     # filter_backends = (filters.SearchFilter,)
     # search_fields = ('username',)
@@ -54,39 +55,26 @@ class UserViewSet(DjoserUserViewSet):
         permission_classes=[permissions.IsAuthenticated],
         serializer_class=FollowSerializer,
     )
-    def subscribe(self, request, id=None):
-        author = get_object_or_404(User, id=id)
-        if_already_exists = Follow.objects.filter(
-            user=request.user,
-            author=author,
-        ).exists()
+    def subscribe(self, request, pk=None):
+        author = get_object_or_404(User, pk=pk)
+        fields = {'user': request.user, 'author': author}
+        if_already_exists = Follow.objects.filter(**fields).exists()
         if request.method == 'DELETE':
-            if not if_already_exists:
-                return Response(
-                    {
-                        'errors': ('Вы еще не подписаны!')
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            get_object_or_404(Follow,
-                              user=request.user,
-                              author=author).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        if if_already_exists or request.user == author:
-            return Response(
-                {
-                    'errors': ('Вы уже подписаны или пытаетесь '
-                               'подписатьсяна самого себя.')
-                },
-                status=status.HTTP_400_BAD_REQUEST
+            return delete_obj(
+                model=Follow,
+                fields=fields,
+                exist=if_already_exists,
+                errors_message=_('Вы еще не подписаны!'),
             )
-        new_follower = Follow.objects.create(user=request.user, author=author)
-        serializer = self.get_serializer(
-            new_follower,
+        return response_created_odj(
+            model=Follow,
+            fields=fields,
+            exist=bool(if_already_exists or request.user == author),
+            errors_message=_('Вы уже подписаны или пытаетесь '
+                             'подписатьсяна самого себя.'),
+            serializer_class=self.get_serializer_class(),
             context={'request': request}
         )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(
         methods=['get'],

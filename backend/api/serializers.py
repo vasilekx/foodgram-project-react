@@ -93,8 +93,6 @@ class FollowSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         data = super(FollowSerializer, self).to_representation(instance)
-        rep = data.get('recipes')
-        print(rep)
         data['recipes'] = SubscriptionsRecipeSerializer(
             instance=data.get('recipes'),
             many=True
