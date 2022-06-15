@@ -24,9 +24,7 @@ from .serializers import (
     FollowSerializer
 )
 
-# from .filters import TitleFilter
 from .permissions import IsOwnerOrReadOnly
-from .viewsets import CreateDestroyListViewSet
 
 
 class UserViewSet(DjoserUserViewSet):
@@ -50,45 +48,39 @@ class UserViewSet(DjoserUserViewSet):
     #     serializer = self.get_serializer(user)
     #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def subscribe(self):
-        pass
-
     @action(
         methods=['post', 'delete'],
         detail=True,
-        url_path='subscribe',
-        # url_name='users_detail',
         permission_classes=[permissions.IsAuthenticated],
-        # serializer_class=MeUserSerializer,
+        serializer_class=FollowSerializer,
     )
-    def subscribes(self, request):
-        author = get_object_or_404(User, id=self.kwargs.get('user_id'))
-        if request.method == 'POST':
-            if_already_exists = Follow.objects.filter(
-                user=request.user,
-                author=author,
-            ).exists()
-            if if_already_exists or request.user == author:
-                return Response(
-                    {
-                        'errors': ('Вы уже подписаны или пытаетесь '
-                                   'подписатьсяна самого себя.')
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            new_sub = Follow.objects.create(
-                user=request.user,
-                author=author,
+    def subscribe(self, request, id=None):
+        print(id)
+        print(self.kwargs.get('user_id'))
+        author = get_object_or_404(User, id=id)
+        if request.method == 'DELETE':
+            get_object_or_404(Follow,
+                              user=request.user,
+                              author=author).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if_already_exists = Follow.objects.filter(
+            user=request.user,
+            author=author,
+        ).exists()
+        if if_already_exists or request.user == author:
+            return Response(
+                {
+                    'errors': ('Вы уже подписаны или пытаетесь '
+                               'подписатьсяна самого себя.')
+                },
+                status=status.HTTP_400_BAD_REQUEST
             )
-            serializer = FollowSerializer(
-                new_sub,
-                context={'request': request}
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        get_object_or_404(Follow,
-                          user=request.user,
-                          author=author).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        new_follower = Follow.objects.create(user=request.user, author=author)
+        serializer = self.get_serializer(
+            new_follower,
+            context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(
         methods=['get'],
@@ -135,22 +127,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if self.request.method in ('POST', 'PATCH',):
             return RecipeCreateSerializer
         return self.serializer_class
-
-
-# class FollowViewSet(viewsets.ModelViewSet):
-#     serializer_class = FollowSerializer
-#     permission_classes = (IsOwnerOrReadOnly,)
-#     # filter_backends = (filters.SearchFilter,)
-#     # search_fields = ('following__username',)
-#
-#     def get_user(self):
-#         return get_object_or_404(User, pk=self.kwargs.get('user_id'))
-#
-#     def get_queryset(self):
-#         return self.request.user.follower.all()
-#
-#     def perform_create(self, serializer):
-#         serializer.save(user=self.request.user, author=self.get_user())
-#
-#     def perform_destroy(self, instance):
-#         instance.delete()

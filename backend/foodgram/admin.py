@@ -34,8 +34,6 @@ class RecipeAdmin(admin.ModelAdmin):
     # get_tags.admin_order_field = 'post__pk'
     get_tags.short_description = _('Теги рецепта')
 
-    # def _tags(self, obj):
-    #     return obj.tags.all()
 
 
 @admin.register(User)
@@ -66,12 +64,14 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
     recipe_pk.short_description = _('Ключ рецепта')
 
 
-# admin.site.register(User)
-admin.site.register(Follow)
-# admin.site.register(Ingredient)
+@admin.register(Follow)
+class FollowAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'user', 'author',)
+    ordering = ('-pk',)
+    empty_value_display = '-пусто-'
+
+
 admin.site.register(Tag)
-# admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(RecipeTag)
-# admin.site.register(RecipeIngredient)
 admin.site.register(Favorite)
 admin.site.register(ShoppingCart)

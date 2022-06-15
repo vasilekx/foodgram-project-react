@@ -52,6 +52,13 @@ class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
         return value
 
 
+class SubscriptionsRecipeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'cooking_time',) # 'image'
+
+
 class FollowSerializer(serializers.Serializer):
     email = serializers.ReadOnlyField(source='author.email')
     id = serializers.ReadOnlyField(source='author.id')
@@ -78,14 +85,21 @@ class FollowSerializer(serializers.Serializer):
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
 
-    # def get_is_subscribed(self):
-    #     pass
-    #
-    # def get_recipes_count(self):
-    #     pass
-
     def get_recipes(self, obj):
-        return None
+        recipes_limit = int(self.context.get('request').query_params.get(
+            'recipes_limit', 0
+        ))
+        return obj.author.recipes.all()[:recipes_limit]
+
+    def to_representation(self, instance):
+        data = super(FollowSerializer, self).to_representation(instance)
+        rep = data.get('recipes')
+        print(rep)
+        data['recipes'] = SubscriptionsRecipeSerializer(
+            instance=data.get('recipes'),
+            many=True
+        ).data
+        return data
 
 
 class TagSerializer(serializers.ModelSerializer):
