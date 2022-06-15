@@ -52,19 +52,15 @@ class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
         return value
 
 
-class FavoriteRecipeSerializer(serializers.Serializer):
-    id = serializers.ReadOnlyField(source='recipes.id')
-    name = serializers.ReadOnlyField(source='recipes.name')
-    cooking_time = serializers.ReadOnlyField(source='recipes.cooking_time')
-    # image = serializers.ReadOnlyField(source='recipes.image')
-    test = serializers.SerializerMethodField()
+class FavoriteOrShoppingCartRecipeSerializer(serializers.Serializer):
+    id = serializers.ReadOnlyField(source='recipe.id')
+    name = serializers.ReadOnlyField(source='recipe.name')
+    cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
+    # image = serializers.ReadOnlyField(source='recipe.image')
 
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'cooking_time',) # 'image'
-
-    def get_test(self, obj):
-        return False
 
 
 class FollowRecipeSerializer(serializers.ModelSerializer):

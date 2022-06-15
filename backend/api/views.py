@@ -10,10 +10,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, viewsets, permissions, status, filters
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
+from rest_framework.request import Request
 from djoser.views import UserViewSet as DjoserUserViewSet
 
-from foodgram.models import (User, Ingredient, Tag, Recipe, RecipeIngredient,
-                             Follow, Favorite)
+
+from foodgram.models import (User, Ingredient, Tag, Recipe,
+                             Follow, Favorite, ShoppingCart)
 
 
 from .serializers import (
@@ -22,11 +24,12 @@ from .serializers import (
     RecipeCreateSerializer,
     RecipeSerializer,
     FollowSerializer,
-    FavoriteRecipeSerializer
+    FavoriteOrShoppingCartRecipeSerializer
 )
 
 from .permissions import IsOwnerOrReadOnly, IsOwner
-from .utilities import delete_object, response_created_object
+from .utilities import (delete_object, response_created_object,
+                        create_or_delete_favorite_or_purchase_recipe)
 
 
 class UserViewSet(DjoserUserViewSet):
@@ -129,23 +132,61 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsOwner],
     )
     def favorite(self, request, pk=None):
-        favorite_recipe = get_object_or_404(Recipe, pk=pk)
-        fields = {'user': request.user, 'recipe': favorite_recipe}
-        if_already_exists = Favorite.objects.filter(**fields).exists()
+        # print(self)
+        # print(type(self))
+        # print(request)
+        # print(type(request))
+
+        return create_or_delete_favorite_or_purchase_recipe(
+            request=request,
+            pk_object=pk,
+            model_object=Favorite,
+            model_recipe=Recipe,
+            serializer_class=FavoriteOrShoppingCartRecipeSerializer,
+            post_errors_message=_('Рецепт уже добавлен в избранное!'),
+            delete_errors_message=_('Рецепт ещё не добавлен в избранное!')
+        )
+
+        # favorite_recipe = get_object_or_404(Recipe, pk=pk)
+        # fields = {'user': request.user, 'recipe': favorite_recipe}
+        # if_already_exists = Favorite.objects.filter(**fields).exists()
+        # if request.method == 'DELETE':
+        #     return delete_object(
+        #         model=Favorite,
+        #         fields=fields,
+        #         exist=if_already_exists,
+        #         errors_message=_('Рецепт ещё не добавлен в избранное!'),
+        #     )
+        # return response_created_object(
+        #     model=Favorite,
+        #     fields=fields,
+        #     exist=if_already_exists,
+        #     errors_message=_('Рецепт уже добавлен в избранное!'),
+        #     serializer_class=FavoriteOrShoppingCartRecipeSerializer,
+        #     context={'request': request}
+        # )
+
+    @action(
+        methods=['post', 'delete'],
+        detail=True,
+        permission_classes=[IsOwner],
+    )
+    def shopping_cart(self, request, pk=None):
+        recipe_purchase = get_object_or_404(Recipe, pk=pk)
+        fields = {'user': request.user, 'recipe': recipe_purchase}
+        if_already_exists = ShoppingCart.objects.filter(**fields).exists()
         if request.method == 'DELETE':
             return delete_object(
-                model=Favorite,
+                model=ShoppingCart,
                 fields=fields,
                 exist=if_already_exists,
-                errors_message=_('Рецепт ещё не добавлен в избранное!'),
+                errors_message=_('Рецепт ещё не добавлен в список покупок!'),
             )
-        ser = self.get_serializer()
-        cl_ser = self.get_serializer_class()
         return response_created_object(
-            model=Favorite,
+            model=ShoppingCart,
             fields=fields,
             exist=if_already_exists,
-            errors_message=_('Рецепт уже добавлен в избранное!'),
-            serializer_class=FavoriteRecipeSerializer,
+            errors_message=_('Рецепт уже добавлен в список покупок!'),
+            serializer_class=FavoriteOrShoppingCartRecipeSerializer,
             context={'request': request}
         )
