@@ -197,7 +197,6 @@ class RecipeTag(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        # related_name='tags',
         verbose_name=_('Рецепт'),
         null=True,
         help_text=_('Рецепт, к которому будет относиться тег'),
@@ -205,7 +204,6 @@ class RecipeTag(models.Model):
     tag = models.ForeignKey(
         Tag,
         on_delete=models.CASCADE,
-        # related_name='recipes',
         verbose_name=_('Тег'),
         null=True,
         help_text=_('Тег, к которому будет относиться рецепт'),
@@ -227,14 +225,12 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        # related_name='ingredients',
         verbose_name=_('Рецепт'),
         help_text=_('Рецепт, к которому будет относиться ингредиент'),
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.SET_NULL,
-        # related_name='recipes', # recipeingredient_set
         verbose_name=_('Ингредиент'),
         null=True,
         help_text=_('Ингредиент, к которому будет относиться рецепт'),
@@ -254,7 +250,10 @@ class RecipeIngredient(models.Model):
     class Meta:
         verbose_name = _('Ингредиент рецепта')
         verbose_name_plural = _('Ингредиенты рецепта')
-        # UniqueConstraint ??
+        constraints = [
+            models.UniqueConstraint(fields=['recipe', 'ingredient'],
+                                    name='unique_relationships')
+        ]
 
 
 class Favorite(models.Model):
@@ -268,7 +267,7 @@ class Favorite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='users',
+        related_name='favorites',
         verbose_name=_('Рецепт'),
         help_text=_('Рецепт, который есть у пользователей как любимый рецепт'),
     )
@@ -297,7 +296,7 @@ class ShoppingCart(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shoppers',
+        related_name='purchases',
         verbose_name=_('Рецепт'),
         help_text=_('Рецепт, который есть у пользователей в списке покупок'),
     )
