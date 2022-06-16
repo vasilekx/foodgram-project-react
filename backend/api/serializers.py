@@ -264,11 +264,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags_data = validated_data.pop('tags')
         tags = list(instance.tags.all())
-        ingredients_data =validated_data.pop('ingredients')
-        ingredients = instance.ingredients.all()
-        ingredients_list = list(ingredients)
-        print(ingredients_data)
-        print(ingredients)
+        ingredients_data = validated_data.pop('ingredients')
+        ingredients = list(instance.ingredients.values_list('id', flat=True))
         for tag in tags_data:
             if tag in tags:
                 tags.remove(tag)
@@ -282,58 +279,19 @@ class RecipeSerializer(serializers.ModelSerializer):
                     recipe=instance,
                     tag=tag
                 ).delete()
-
-
-
-        # tag_mapping = {tag.id: tag for tag in instance.tags}
-        # print(tag_mapping)
-
-        # data_mapping = {tag.id: tag for tag in tags}
-        # print(data_mapping)
-
-
-        # https://clck.ru/qCEtt
-
-        #book_mapping = {book.id: book for book in instance}
-        #data_mapping = {item['id']: item for item in validated_data}
-        ## Perform creations and updates.
-        #ret = []
-
-        #for book_id, data in data_mapping.items():
-        #    book = book_mapping.get(book_id, None)
-        #    if book is None:
-        #        ret.append(self.child.create(data))
-        #    else:
-        #        ret.append(self.child.update(book, data))
-
-        ## Perform deletions.
-        #for book_id, book in book_mapping.items():
-        #    if book_id not in data_mapping:
-        #        book.delete()
-
-
-        # for Ingredient
-
-        # def update(self, instance, validated_data):
-        #     choices = validated_data.pop('choices')
-        #     instance.title = validated_data.get("title", instance.title)
-        #     instance.save()
-        #     keep_choices = []
-        #     for choice in choices:
-        #         if "id" in choice.keys():
-        #             if Choice.objects.filter(id=choice["id"]).exists():
-        #                 c = Choice.objects.get(id=choice["id"])
-        #                 c.text = choice.get('text', c.text)
-        #                 c.save()
-        #                 keep_choices.append(c.id)
-        #             else:
-        #                 continue
-        #         else:
-        #             c = Choice.objects.create(**choice, question=instance)
-        #             keep_choices.append(c.id)
-        #
-        #     for choice in instance.choices:
-        #         if choice.id not in keep_choices:
-        #             choice.delete()
+        for ingredient in ingredients_data:
+            id, amount = ingredient.values()
+            if id in ingredients:
+                RecipeIngredient.objects.filter(
+                    recipe_id=instance.id,
+                    ingredient_id=id
+                ).update(amount=amount)
+                ingredients.remove(id)
+            else:
+                instance.ingredients.add(
+                    id, through_defaults={'amount': amount}
+                )
+        if ingredients:
+            instance.ingredients.remove(*ingredients)
 
         return super(RecipeSerializer, self).update(instance, validated_data)
