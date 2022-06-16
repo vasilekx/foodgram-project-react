@@ -183,13 +183,8 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
-    # id = serializers.PrimaryKeyRelatedField(
-    #     # source='ingredient',
-    #     queryset=Ingredient.objects.all(),
-    # )
     id = serializers.PrimaryKeyRelatedField(
-        # read_only=True,
-        source='ingredient'
+        queryset=Ingredient.objects.all(),
     )
 
     class Meta:
@@ -202,13 +197,15 @@ class RecipeCreateSerializer(RecipeSerializer):
         many=True,
         queryset=Tag.objects.all(),
     )
-    # ingredients = RecipeIngredientCreateSerializer(
-    #     many=True,
-    # )
     ingredients = RecipeIngredientCreateSerializer(
         many=True,
-        source='recipeingredient_set'
     )
+    # ingredients = serializers.SerializerMethodField()
+
+    # def get_ingredients(self, obj):
+    #     p_obj = obj
+    #     p_obj_all = obj.ingredients.all()
+    #     return 0
 
     def validate(self, attrs):
         print('validate')
@@ -216,15 +213,6 @@ class RecipeCreateSerializer(RecipeSerializer):
         return attrs
 
     def to_representation(self, instance):
-        print(instance)
-        print(type(instance))
-
-        print(instance.tags)
-        print(type(instance.tags))
-
-        print(instance.ingredients)
-        print(type(instance.ingredients))
-
         data = super(RecipeCreateSerializer, self).to_representation(instance)
         data['tags'] = TagSerializer(instance=instance.tags, many=True).data
         data['ingredients'] = RecipeIngredientSerializer(
@@ -241,13 +229,8 @@ class RecipeCreateSerializer(RecipeSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
-        print(validated_data)
         ingredients = validated_data.pop('ingredients')
-        print(ingredients)
-
         ingredients_list = [dict(ingredient) for ingredient in ingredients]
-        print(ingredients_list)
-        print(ingredients_list)
         recipe = Recipe.objects.create(**validated_data)
         for tag in tags:
             current_tag = get_object_or_404(Tag, pk=tag.pk)
@@ -255,14 +238,7 @@ class RecipeCreateSerializer(RecipeSerializer):
                 recipe=recipe,
                 tag=current_tag
             )
-
         for recipe_ingredient in ingredients_list:
-            ingredient = recipe_ingredient.get('id')
-            print(type(id))
-            print(id)
-            amount = recipe_ingredient.get('amount')
-            print(type(amount))
-            print(amount)
             RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient=recipe_ingredient.get('id'),
@@ -273,14 +249,12 @@ class RecipeCreateSerializer(RecipeSerializer):
     def update(self, instance, validated_data):
         tags_data: list = validated_data.pop('tags')
         tags: list = list(instance.tags.all())
-
         for tag in tags_data:
             if tag in tags:
                 tags.remove(tag)
                 print(tags)
             else:
                 RecipeTag.objects.create(recipe=instance, tag=tag)
-
         if tags:
             for tag in tags:
                 get_object_or_404(
@@ -288,8 +262,6 @@ class RecipeCreateSerializer(RecipeSerializer):
                     recipe=instance,
                     tag=tag
                 ).delete()
-
-
 
 
         # tag_mapping = {tag.id: tag for tag in instance.tags}
