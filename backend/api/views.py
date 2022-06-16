@@ -123,6 +123,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    def get_queryset(self):
+        is_favorited = self.request.query_params.get('is_favorited')
+        is_in_shopping_cart = self.request.query_params.get(
+            'is_in_shopping_cart'
+        )
+        author = self.request.query_params.get('author')
+        print('is_favorited', is_favorited)
+        print('is_in_shopping_cart', is_in_shopping_cart)
+        print('author', author)
+        return self.queryset
+
     # def get_serializer_class(self):
     #     if self.request.method in ('POST', 'PATCH',):
     #         return RecipeCreateSerializer

@@ -207,17 +207,24 @@ class RecipeSerializer(serializers.ModelSerializer):
         ).data
         return ingredient_list
 
+    def current_user(self):
+        return self.context.get('request').user
+
     def get_is_favorited(self, obj):
-        return Recipe.objects.filter(
-            id=obj.id,
-            favorites__user=self.context.get('request').user
-        ).exists()
+        if self.current_user().is_authenticated:
+            return Recipe.objects.filter(
+                id=obj.id,
+                favorites__user=self.current_user()
+            ).exists()
+        return False
 
     def get_is_in_shopping_cart(self, obj):
-        return Recipe.objects.filter(
-            id=obj.id,
-            purchases__user=self.context.get('request').user
-        ).exists()
+        if self.current_user().is_authenticated:
+            return Recipe.objects.filter(
+                id=obj.id,
+                purchases__user=self.current_user()
+            ).exists()
+        return False
 
     def to_representation(self, instance):
         data = super(RecipeSerializer, self).to_representation(instance)
