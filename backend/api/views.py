@@ -121,22 +121,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete',
                          'head', 'options', 'trace']
     filter_backends = (DjangoFilterBackend,)
-    # filterset_fields = ('tags', 'author')
     filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-    def get_queryset(self):
-        is_favorited = self.request.query_params.get('is_favorited')
-        is_in_shopping_cart = self.request.query_params.get(
-            'is_in_shopping_cart'
-        )
-        author = self.request.query_params.get('author')
-        print('is_favorited', is_favorited)
-        print('is_in_shopping_cart', is_in_shopping_cart)
-        print('author', author)
-        return self.queryset
 
     @action(
         methods=['post', 'delete'],

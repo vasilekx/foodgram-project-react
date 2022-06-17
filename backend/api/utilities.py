@@ -40,8 +40,6 @@ def response_created_object(model: Type[Model], fields: dict,
         model.objects.create(**fields),
         context=context
     )
-    s = serializer
-    sd = serializer.data
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

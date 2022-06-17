@@ -6,17 +6,26 @@ from foodgram.models import Recipe
 
 
 class RecipeFilter(filters.FilterSet):
-    tags = filters.CharFilter(field_name='tags__slug')
+    tags = filters.CharFilter(field_name='tags__slug', method='tags_filter')
     author = filters.NumberFilter(field_name='author__id')
-    test = filters.BooleanFilter(method='test_filter')
+    is_favorited = filters.NumberFilter(
+        method='is_favorited_or_in_shopping_cart_filter'
+    )
+    is_in_shopping_cart = filters.NumberFilter(
+        method='is_favorited_or_in_shopping_cart_filter'
+    )
+
+    CASES_VALUES = [1, 0]
 
     class Meta:
         model = Recipe
-        fields = ('tags', 'author', 'test',)
+        fields = ('tags', 'author', 'is_favorited', 'is_in_shopping_cart',)
 
-    def test_filter(self, queryset, name, value):
-        s = self
-        q = queryset
-        n = name
-        v = value
+    def is_favorited_or_in_shopping_cart_filter(self, queryset, name, value):
+        user = self.request.user
+        if user.is_authenticated and int(value) in self.CASES_VALUES:
+            if name == 'is_favorited':
+                queryset = queryset.filter(favorites__user=user)
+            if name == 'is_in_shopping_cart':
+                queryset = queryset.filter(purchases__user=user)
         return queryset

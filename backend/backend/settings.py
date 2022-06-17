@@ -123,7 +123,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 
     # 'SEARCH_PARAM': 'search', # def
-    'SEARCH_PARAM': 'name',  # For Ingredient
+    # 'SEARCH_PARAM': 'name',  # For Ingredient
 }
 
 DJOSER = {

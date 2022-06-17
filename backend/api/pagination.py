@@ -1,6 +1,5 @@
 # api/pagination.py
 
-# cats/pagination.py
 from rest_framework.pagination import PageNumberPagination
 
 
