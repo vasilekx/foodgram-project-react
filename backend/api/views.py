@@ -30,6 +30,7 @@ from .serializers import (
 from .permissions import IsOwnerOrReadOnly, IsOwner
 from .utilities import (delete_object, response_created_object,
                         create_or_delete_favorite_or_purchase_recipe)
+from .filter import RecipeFilter
 
 
 class UserViewSet(DjoserUserViewSet):
@@ -119,6 +120,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOwnerOrReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete',
                          'head', 'options', 'trace']
+    filter_backends = (DjangoFilterBackend,)
+    # filterset_fields = ('tags', 'author')
+    filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -133,11 +137,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         print('is_in_shopping_cart', is_in_shopping_cart)
         print('author', author)
         return self.queryset
-
-    # def get_serializer_class(self):
-    #     if self.request.method in ('POST', 'PATCH',):
-    #         return RecipeCreateSerializer
-    #     return self.serializer_class
 
     @action(
         methods=['post', 'delete'],
