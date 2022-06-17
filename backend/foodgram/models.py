@@ -7,14 +7,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from .validators import validate_username, validate_tag_color
 
-USER = 'user'
-ADMIN = 'admin'
-
-ROLE_CHOICES = (
-    (USER, _('Пользователь')),
-    (ADMIN, _('Администратор')),
-)
-
 
 class User(AbstractUser):
     username = models.CharField(
@@ -38,12 +30,6 @@ class User(AbstractUser):
         max_length=150,
         blank=True,
     )
-    role = models.CharField(
-        _('Роль'),
-        choices=ROLE_CHOICES,
-        max_length=max(len(role) for role, _ in ROLE_CHOICES),
-        default=USER,
-    )
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
@@ -55,10 +41,6 @@ class User(AbstractUser):
         ordering = ['username']
         verbose_name = _('Пользователь')
         verbose_name_plural = _('Пользователи')
-
-    @property
-    def is_admin(self):
-        return self.role == ADMIN or self.is_staff
 
 
 class Follow(models.Model):
@@ -99,6 +81,7 @@ class Ingredient(models.Model):
     name = models.CharField(
         _('Название ингредиента'),
         max_length=200,
+        db_index=True
     )
     measurement_unit = models.CharField(
         _('Единица измерения ингредиента'),
@@ -142,7 +125,7 @@ class Tag(models.Model):
         return f'{self.name}, {self.color}, {self.slug}'
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name',)
         verbose_name = _('Тег')
         verbose_name_plural = _('Теги')
 
@@ -182,13 +165,24 @@ class Recipe(models.Model):
         through='RecipeIngredient',
         through_fields=('recipe', 'ingredient')
     )
-    # image = ...
+    image = models.ImageField(
+        _('Картинка'),
+        upload_to='foodgram/',
+        blank=True,
+        null=True
+    )
+    pub_date = models.DateTimeField(
+        _('Дата создания'),
+        auto_now_add=True,
+        help_text=_('Дата создания будет автоматически установлена '
+                    'в текущую дату при создании рецепта.')
+    )
 
     def __str__(self):
         return '{:.15}'.format(self.name)
 
     class Meta:
-        ordering = ['-id']
+        ordering = ('-pub_date',)
         verbose_name = _('Рецепт')
         verbose_name_plural = _('Рецепты')
 
@@ -210,7 +204,7 @@ class RecipeTag(models.Model):
     )
 
     def __str__(self):
-        return f'{self.recipe} has {self.tag}'
+        return f'{self.recipe} has a tag {self.tag}.'
 
     class Meta:
         verbose_name = _('Тег рецепта')
@@ -245,7 +239,8 @@ class RecipeIngredient(models.Model):
     )
 
     def __str__(self):
-        return f'{self.recipe} has {self.ingredient}'
+        return (f'{self.recipe} has a ingredient '
+                f'{self.ingredient} in composition.')
 
     class Meta:
         verbose_name = _('Ингредиент рецепта')
@@ -273,7 +268,7 @@ class Favorite(models.Model):
     )
 
     def __str__(self):
-        return f'{self.user} has {self.recipe}'
+        return f'{self.user} has a recipe {self.recipe} in favorites.'
 
     class Meta:
         ordering = ['user']
@@ -302,7 +297,7 @@ class ShoppingCart(models.Model):
     )
 
     def __str__(self):
-        return f'{self.user} has {self.recipe}'
+        return f'{self.user} has a recipe {self.recipe} in purchases.'
 
     class Meta:
         ordering = ['user']
