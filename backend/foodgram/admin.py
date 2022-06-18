@@ -19,8 +19,13 @@ class RecipeIngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    # fields = ('pk', 'name', 'text', 'author', 'cooking_time', 'get_tags',)
-    list_display = ('pk', 'name', 'author', 'get_tags',)
+    fields = (
+        ('name', 'author'),
+        'cooking_time', 'text',
+        'get_quantity_added_favorites'
+    )
+    readonly_fields = ('get_quantity_added_favorites', 'get_tags')
+    list_display = ('pk', 'name', 'author', 'get_tags')
     # list_display_links = ('name', 'text', 'get_tags')
                     # 'tags', 'ingredients')
     # list_editable = ('get_tags',)
@@ -30,15 +35,21 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = (RecipeTagInline, RecipeIngredientInline,)
 
     def get_tags(self, obj):
-        return [tag.tag.name for tag in RecipeTag.objects.filter(recipe=obj)]
+        return [tag.name for tag in obj.tags.all()]
     # get_tags.admin_order_field = 'post__pk'
-    get_tags.short_description = _('Теги рецепта')
 
+    def get_quantity_added_favorites(self, obj):
+        return obj.favorites.count()
+
+    get_tags.short_description = _('Теги рецепта')
+    get_quantity_added_favorites.short_description = _(
+        'Добавлений рецепта в избранное'
+    )
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'username', 'email', 'first_name', 'last_name', )
+    list_display = ('pk', 'username', 'email', 'first_name', 'last_name',)
     search_fields = ('username', 'email', 'first_name', 'last_name',)
     list_filter = ('username', 'email', 'first_name')
     empty_value_display = '-пусто-'
@@ -54,14 +65,34 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'recipe_pk',  'recipe', 'ingredient', 'amount')
+    list_display = ('pk', 'recipe_pk',  'recipe',
+                    'ingredient_pk', 'ingredient', 'amount')
+
+    def recipe_pk(self, obj):
+        return obj.recipe.pk
+
+    def ingredient_pk(self, obj):
+        return obj.ingredient.pk
+
+    recipe_pk.admin_order_field = 'recipe__pk'
+    recipe_pk.short_description = _('Ключ рецепта')
+    ingredient_pk.short_description = _('Ключ ингредиента')
+
+
+@admin.register(RecipeTag)
+class RecipeTagAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'recipe_pk', 'recipe', 'tag_pk', 'tag',)
     empty_value_display = '-пусто-'
 
     def recipe_pk(self, obj):
         return obj.recipe.pk
 
+    def tag_pk(self, obj):
+        return obj.tag.pk
+
     recipe_pk.admin_order_field = 'recipe__pk'
     recipe_pk.short_description = _('Ключ рецепта')
+    tag_pk.short_description = _('Ключ тега')
 
 
 @admin.register(Follow)
@@ -82,7 +113,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     ordering = ('-pk',)
 
 
-admin.site.register(Tag)
-admin.site.register(RecipeTag)
-# admin.site.register(Favorite)
-# admin.site.register(ShoppingCart)
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'name', 'color', 'slug')
+    ordering = ('-pk',)

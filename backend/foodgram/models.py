@@ -224,13 +224,13 @@ class RecipeIngredient(models.Model):
     )
     ingredient = models.ForeignKey(
         Ingredient,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         verbose_name=_('Ингредиент'),
         null=True,
         help_text=_('Ингредиент, к которому будет относиться рецепт'),
     )
     amount = models.IntegerField(
-        _('Количество'),
+        _('Количество ингредиента'),
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10000)
