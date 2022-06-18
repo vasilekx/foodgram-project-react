@@ -40,7 +40,12 @@ class UserSerializer(MixinUserSerializer, DjoserUserSerializer):
         read_only_fields = ('is_subscribed',)
 
     def get_is_subscribed(self, obj):
-        return False
+        user = self.context.get('request').user
+        if user.is_authenticated and user != obj:
+            status = user.following.filter(user=obj).exists()
+        else:
+            status = False
+        return status
 
 
 class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
@@ -171,7 +176,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
-    # tags = TagSerializer(many=True, read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all(),
@@ -197,8 +201,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_ingredients(self, value):
         """Получение ключа ingredients."""
-        print(value.ingredients.all())
-        ingredients_all = value.ingredients.all()
         ingredient_list = RecipeIngredientSerializer(
             value.ingredients.all(),
             many=True,
