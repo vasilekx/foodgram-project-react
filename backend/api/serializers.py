@@ -1,15 +1,14 @@
 # api/serializers.py
 
-from django.conf import settings
-from django.shortcuts import get_list_or_404
-from django.utils.translation import ugettext_lazy as _
+import base64, uuid
+
+from django.core.files.base import ContentFile
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
 from djoser.serializers import (
     UserCreateSerializer as DjoserUserCreateSerializer,
     UserSerializer as DjoserUserSerializer
 )
-from rest_framework.generics import get_object_or_404
-from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from foodgram.models import (
     Ingredient, Tag, Follow,
@@ -62,17 +61,17 @@ class FavoriteOrShoppingCartRecipeSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField(source='recipe.id')
     name = serializers.ReadOnlyField(source='recipe.name')
     cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
-    # image = serializers.ReadOnlyField(source='recipe.image')
+    image = serializers.ImageField(source='recipe.image', read_only=True)
 
     class Meta:
-        fields = ('id', 'name', 'cooking_time',) # 'image'
+        fields = ('id', 'name', 'cooking_time', 'image')
 
 
 class FollowRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'cooking_time',) # 'image'
+        fields = ('id', 'name', 'cooking_time', 'image')
 
 
 class FollowSerializer(serializers.Serializer):
@@ -132,27 +131,6 @@ class IngredientSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'name', 'measurement_unit',)
 
 
-# class RecipeIngredientSerializer(serializers.ModelSerializer):
-#     id = serializers.PrimaryKeyRelatedField(
-#         read_only=True,
-#         source='ingredient'
-#     )
-#     name = serializers.SlugRelatedField(
-#         read_only=True,
-#         slug_field='name',
-#         source='ingredient'
-#     )
-#     measurement_unit = serializers.SlugRelatedField(
-#         read_only=True,
-#         slug_field='measurement_unit',
-#         source='ingredient'
-#     )
-#
-#     class Meta:
-#         model = RecipeIngredient
-#         fields = ('id', 'name', 'measurement_unit', 'amount',)
-#         # read_only_fields = ( 'amount',)
-
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для модели AmountIngredient."""
     name = serializers.ReadOnlyField()
@@ -164,8 +142,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
     def get_amount(self, obj):
-        print(obj.recipeingredient_set)
-        recipeingredient_set = obj.recipeingredient_set
         obj = get_object_or_404(
             obj.recipeingredient_set,
             ingredient_id=obj.id,
@@ -174,7 +150,25 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         return obj
 
 
+# Custom image field - handles base 64 encoded images
+class Base64ImageField(serializers.ImageField):
+    """
+    Пользовательское поле изображения -
+    обрабатывает изображения в кодировке base64.
+    """
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            id = uuid.uuid4()
+            data = ContentFile(
+                base64.b64decode(imgstr),
+                name=id.urn[9:] + '.' + ext)
+        return super(Base64ImageField, self).to_internal_value(data)
+
+
 class RecipeSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
     author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -188,14 +182,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = (
             'id',
-            'ingredients',
             'name',
             'text',
             'author',
-            'tags',
             'cooking_time',
+            'image',
             'is_favorited',
             'is_in_shopping_cart',
+            'tags',
+            'ingredients',
         )
         read_only_fields = ('is_favorited', 'is_in_shopping_cart',)
 
@@ -231,10 +226,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super(RecipeSerializer, self).to_representation(instance)
         data['tags'] = TagSerializer(instance=instance.tags, many=True).data
-        # data['ingredients'] = RecipeIngredientSerializer(
-        #     instance=instance.ingredients,
-        #     many=True
-        # ).data
         return data
 
     def validate_tags(self, value):

@@ -19,11 +19,10 @@ class RecipeIngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    fields = (
-        ('name', 'author'),
-        'cooking_time', 'text',
-        'get_quantity_added_favorites'
-    )
+    fields = (('name', 'author'),
+              'cooking_time', 'text',
+              'get_quantity_added_favorites',
+              'image')
     readonly_fields = ('get_quantity_added_favorites', 'get_tags')
     list_display = ('pk', 'name', 'author', 'get_tags')
     # list_display_links = ('name', 'text', 'get_tags')

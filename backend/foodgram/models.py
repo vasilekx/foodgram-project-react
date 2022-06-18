@@ -149,10 +149,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(
         _('Время приготовления'),
-        validators=[
-            MinValueValidator(1),
-            MaxValueValidator(3600)
-        ],
+        validators=(MinValueValidator(1),),
         help_text=_('Время приготовления (в минутах)')
     )
     tags = models.ManyToManyField(
@@ -167,7 +164,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         _('Картинка'),
-        upload_to='foodgram/',
+        upload_to='foodgram/images/',
         blank=True,
         null=True
     )
@@ -231,10 +228,7 @@ class RecipeIngredient(models.Model):
     )
     amount = models.IntegerField(
         _('Количество ингредиента'),
-        validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10000)
-        ],
+        validators=(MinValueValidator(1),),
         help_text=_('Количество ингредиента требуемого для рецепта')
     )
 
