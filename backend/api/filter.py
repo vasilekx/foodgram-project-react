@@ -6,7 +6,7 @@ from foodgram.models import Recipe
 
 
 class RecipeFilter(filters.FilterSet):
-    tags = filters.CharFilter(field_name='tags__slug', method='tags_filter')
+    tags = filters.CharFilter(field_name='tags__slug')
     author = filters.NumberFilter(field_name='author__id')
     is_favorited = filters.NumberFilter(
         method='is_favorited_or_in_shopping_cart_filter'

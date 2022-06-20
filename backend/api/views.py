@@ -97,7 +97,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (permissions.AllowAny,)
     pagination_class = None
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
-    search_fields = ('^name', 'name',)
+    search_fields = ('name',)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
