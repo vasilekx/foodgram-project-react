@@ -1,16 +1,10 @@
 # api/views.py
 
-from django.conf import settings
-from django.core.mail import send_mail
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django.utils.crypto import get_random_string
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, viewsets, permissions, status, filters
-from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.response import Response
-from rest_framework.request import Request
+from rest_framework import viewsets, permissions, filters
+from rest_framework.decorators import action
 from djoser.views import UserViewSet as DjoserUserViewSet
 
 
@@ -21,7 +15,6 @@ from foodgram.models import (User, Ingredient, Tag, Recipe,
 from .serializers import (
     IngredientSerializer,
     TagSerializer,
-    # RecipeCreateSerializer,
     RecipeSerializer,
     FollowSerializer,
     FavoriteOrShoppingCartRecipeSerializer

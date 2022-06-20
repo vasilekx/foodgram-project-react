@@ -1,6 +1,7 @@
 # api/serializers.py
 
-import base64, uuid
+import base64
+import uuid
 
 from django.core.files.base import ContentFile
 from rest_framework import serializers
@@ -13,9 +14,11 @@ from djoser.serializers import (
 from foodgram.models import (
     Ingredient, Tag, Follow,
     Recipe, RecipeTag, RecipeIngredient,
-    User, Favorite, ShoppingCart
+    User
 )
-from foodgram.validators import validate_username
+
+from users.validators import validate_username
+
 from .validators import validate_ingredients
 
 

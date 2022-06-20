@@ -159,7 +159,7 @@ DJOSER = {
 }
 
 
-AUTH_USER_MODEL = 'foodgram.User'
+AUTH_USER_MODEL = 'users.User'
 
 RESERVED_USERNAME: str = r'me'
 
