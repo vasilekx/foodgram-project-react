@@ -133,4 +133,4 @@ dmypy.json
 
 !frontend/*
 
-media/
+.media/
