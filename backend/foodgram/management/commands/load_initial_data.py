@@ -1,4 +1,4 @@
-# foodgram/management/commands/load_tags_data.py
+# foodgram/management/commands/load_initial_data.py
 
 import csv
 import os
@@ -7,7 +7,7 @@ from django.core.management import BaseCommand
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from foodgram.models import Ingredient
+from foodgram.models import Ingredient, Tag
 
 ALREDY_LOADED_ERROR_MESSAGE = _(
     'База данных не пуста! '
@@ -18,6 +18,7 @@ ALREDY_LOADED_ERROR_MESSAGE = _(
 )
 
 data_files_list = [
+    ['tags.csv', Tag],
     ['ingredients.csv', Ingredient],
 ]
 
@@ -34,10 +35,17 @@ def load_tags_data(list_data: list) -> None:
         with open(path, 'r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile, delimiter=',', quotechar='"')
             for row in reader:
-                ingredient, _ = Ingredient.objects.get_or_create(
-                    name=row[0],
-                    measurement_unit=row[1]
-                )
+                if file == 'ingredients.csv':
+                    ingredient, _ = model.objects.get_or_create(
+                        name=row[0],
+                        measurement_unit=row[1]
+                    )
+                if file == 'tags.csv':
+                    tag, _ = model.objects.get_or_create(
+                        name=row[0],
+                        color=row[1],
+                        slug=row[2],
+                    )
 
 
 class Command(BaseCommand):
