@@ -44,7 +44,7 @@ class UserSerializer(MixinUserSerializer, DjoserUserSerializer):
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
         if user.is_authenticated and user != obj:
-            status = user.following.filter(user=obj).exists()
+            status = user.follower.filter(author=obj).exists()
         else:
             status = False
         return status

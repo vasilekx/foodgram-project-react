@@ -150,3 +150,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
             post_errors_message=_('Рецепт уже добавлен в список покупок!'),
             delete_errors_message=_('Рецепт ещё не добавлен в список покупок!')
         )
+
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def download_shopping_cart(self, request):
+
+        # return
+        pass
