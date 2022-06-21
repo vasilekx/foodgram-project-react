@@ -2,15 +2,22 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
+from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.db.models import Count, Sum
+from rest_framework.response import Response
+from django.shortcuts import render
+
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from djoser.views import UserViewSet as DjoserUserViewSet
 
 
 from foodgram.models import (User, Ingredient, Tag, Recipe,
                              Follow, Favorite, ShoppingCart)
-
+from .process import html_to_pdf_2
 
 from .serializers import (
     IngredientSerializer,
@@ -154,9 +161,33 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         methods=['get'],
         detail=False,
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=[permissions.AllowAny],
     )
     def download_shopping_cart(self, request):
-
-        # return
-        pass
+        # return HttpResponse(html_to_pdf_2(), content_type='application/pdf')
+        user = request.user
+        purchases_data = user.purchases.all().select_related(
+            'recipe'
+        ).order_by(
+            'recipe__ingredients__name'
+        ).values(
+            'recipe__ingredients__name',
+            'recipe__ingredients__measurement_unit'
+        ).annotate(
+            amount=Sum('recipe__recipeingredient__amount')
+        )
+        if not purchases_data:
+            return Response(
+                {
+                    'error': _('Ваш список покупок пуст!')
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        purchases_text = 'Продуктовый помощник\nСписок покупок\n\n'
+        for item in purchases_data:
+            ingredient, measurement_unit, amount = item.values()
+            purchases_text += f'{ingredient} - {amount}({measurement_unit})\n'
+        response = HttpResponse(purchases_text, content_type='text/plain')
+        filename = 'shopping_list.txt'
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response

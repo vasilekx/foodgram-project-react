@@ -10,10 +10,10 @@ from .views import (
 app_name = 'api'
 
 router = routers.DefaultRouter()
+router.register(r'recipes', RecipeViewSet, basename='recipes')
 router.register(r'users', UserViewSet, basename='users')
 router.register(r'ingredients', IngredientViewSet, basename='ingredients')
 router.register(r'tags', TagViewSet, basename='tags')
-router.register(r'recipes', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
