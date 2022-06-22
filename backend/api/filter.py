@@ -6,7 +6,7 @@ from foodgram.models import Recipe
 
 
 class RecipeFilter(filters.FilterSet):
-    tags = filters.CharFilter(field_name='tags__slug')
+    tags = filters.CharFilter(field_name='tags__slug', method='tags_filter')
     author = filters.NumberFilter(field_name='author__id')
     is_favorited = filters.NumberFilter(
         method='is_favorited_or_in_shopping_cart_filter'
@@ -20,6 +20,11 @@ class RecipeFilter(filters.FilterSet):
     class Meta:
         model = Recipe
         fields = ('tags', 'author', 'is_favorited', 'is_in_shopping_cart',)
+
+    def tags_filter(self, queryset, name, value):
+        tags_query_parameter = self.request.query_params.getlist('tags')
+        lookup = '__'.join([name, 'in'])
+        return queryset.filter(**{lookup: tags_query_parameter}).distinct()
 
     def is_favorited_or_in_shopping_cart_filter(self, queryset, name, value):
         user = self.request.user
