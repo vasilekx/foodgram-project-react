@@ -5,9 +5,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, IntegerField
 from rest_framework.response import Response
 from django.shortcuts import render
+from django.db.models import F, Func, Value, Case, When, Q
+from django.db.models.functions import Length, StrIndex, Substr, NullIf, Coalesce
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions, filters, status
@@ -99,12 +101,28 @@ class UserViewSet(DjoserUserViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (permissions.AllowAny,)
     pagination_class = None
-    filter_backends = (filters.SearchFilter, filters.OrderingFilter)
-    search_fields = ('name',)
+
+    INGREDIENT_SEARCH_PARAM = 'name'
+
+    def get_queryset(self):
+        queryset = Ingredient.objects.all()
+        keywords = self.request.query_params.get(self.INGREDIENT_SEARCH_PARAM)
+        if keywords:
+            at_beginning = Q(name__regex=fr'^{keywords}')
+            anywhere = Q(name__regex=fr'{keywords}')
+            search_type_ordering_expression = Case(
+                When(at_beginning, then=Value(1)),
+                When(anywhere, then=Value(0)),
+                default=Value(-1),
+                output_field=IntegerField()
+            )
+            queryset = queryset.filter(at_beginning | anywhere).annotate(
+                search_type_ordering=search_type_ordering_expression
+            ).distinct().order_by('-search_type_ordering')
+        return queryset
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
