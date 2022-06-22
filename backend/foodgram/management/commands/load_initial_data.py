@@ -7,7 +7,7 @@ from django.core.management import BaseCommand
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from foodgram.models import Ingredient, Tag
+from foodgram.models import Ingredient, Tag, User
 
 ALREDY_LOADED_ERROR_MESSAGE = _(
     'База данных не пуста! '
@@ -20,6 +20,7 @@ ALREDY_LOADED_ERROR_MESSAGE = _(
 data_files_list = [
     ['tags.csv', Tag],
     ['ingredients.csv', Ingredient],
+    ['users.csv', User],
 ]
 
 
@@ -34,18 +35,31 @@ def load_tags_data(list_data: list) -> None:
     for file, model, path in list_data:
         with open(path, 'r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+            header = next(reader)
             for row in reader:
+                import_dict = {
+                    key: value for key, value in zip(header, row)
+                }
+                print(import_dict)
                 if file == 'ingredients.csv':
-                    ingredient, _ = model.objects.get_or_create(
-                        name=row[0],
-                        measurement_unit=row[1]
-                    )
+                    ingredient, _ = model.objects.get_or_create(**import_dict)
+                    # ingredient, _ = model.objects.get_or_create(
+                    #     name=row[0],
+                    #     measurement_unit=row[1]
+                    # )
                 if file == 'tags.csv':
-                    tag, _ = model.objects.get_or_create(
-                        name=row[0],
-                        color=row[1],
-                        slug=row[2],
-                    )
+                    tag, _ = model.objects.get_or_create(**import_dict)
+                    # tag, _ = model.objects.get_or_create(
+                    #     name=row[0],
+                    #     color=row[1],
+                    #     slug=row[2],
+                    # )
+                if file == 'users.csv':
+                    raw_password = import_dict.pop('password')
+                    user, created = model.objects.get_or_create(**import_dict)
+                    if created:
+                        user.set_password(raw_password)
+                        user.save()
 
 
 class Command(BaseCommand):

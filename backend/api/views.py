@@ -2,25 +2,27 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
-from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
-from django.template.loader import render_to_string
-from django.db.models import Count, Sum, IntegerField
-from rest_framework.response import Response
-from django.shortcuts import render
-from django.db.models import F, Func, Value, Case, When, Q
-from django.db.models.functions import Length, StrIndex, Substr, NullIf, Coalesce
+from django.db.models import Sum, IntegerField, Value, Case, When, Q
 
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, permissions, filters, status
+from rest_framework.response import Response
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 
+from foodgram.models import (
+    User,
+    Ingredient,
+    Tag,
+    Recipe,
+    Follow,
+    Favorite,
+    ShoppingCart
+)
 
-from foodgram.models import (User, Ingredient, Tag, Recipe,
-                             Follow, Favorite, ShoppingCart)
-from .process import html_to_pdf_2
-
+from .filter import RecipeFilter
+from .permissions import IsOwnerOrReadOnly, IsOwner
 from .serializers import (
     IngredientSerializer,
     TagSerializer,
@@ -28,11 +30,11 @@ from .serializers import (
     FollowSerializer,
     FavoriteOrShoppingCartRecipeSerializer
 )
-
-from .permissions import IsOwnerOrReadOnly, IsOwner
-from .utilities import (delete_object, response_created_object,
-                        create_or_delete_favorite_or_purchase_recipe)
-from .filter import RecipeFilter
+from .utilities import (
+    create_or_delete_favorite_or_purchase_recipe,
+    delete_object,
+    response_created_object,
+)
 
 
 class UserViewSet(DjoserUserViewSet):

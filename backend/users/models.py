@@ -22,12 +22,10 @@ class User(AbstractUser):
     first_name = models.CharField(
         _('Имя'),
         max_length=150,
-        blank=True,
     )
     last_name = models.CharField(
         _('Фамилия'),
         max_length=150,
-        blank=True,
     )
 
     USERNAME_FIELD = 'username'
