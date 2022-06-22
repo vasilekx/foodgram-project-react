@@ -23,6 +23,7 @@ from .validators import validate_ingredients
 
 
 class MixinUserSerializer:
+    """Mixin для модели User."""
     username = serializers.CharField(max_length=150, required=True)
     email = serializers.EmailField(max_length=254, required=True)
 
@@ -34,6 +35,7 @@ class MixinUserSerializer:
 
 
 class UserSerializer(MixinUserSerializer, DjoserUserSerializer):
+    """Сериализатор для модели User."""
     password = serializers.CharField(write_only=True)
     is_subscribed = serializers.SerializerMethodField()
 
@@ -51,7 +53,7 @@ class UserSerializer(MixinUserSerializer, DjoserUserSerializer):
 
 
 class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
-
+    """Сериализатор создания модели User."""
     class Meta(MixinUserSerializer.Meta):
         pass
 
@@ -61,6 +63,10 @@ class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
 
 
 class FavoriteOrShoppingCartRecipeSerializer(serializers.Serializer):
+    """
+    Сериализатор для отображения модели Recipe
+    при добавление в избранное/список покупок.
+    """
     id = serializers.ReadOnlyField(source='recipe.id')
     name = serializers.ReadOnlyField(source='recipe.name')
     cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
@@ -71,13 +77,14 @@ class FavoriteOrShoppingCartRecipeSerializer(serializers.Serializer):
 
 
 class FollowRecipeSerializer(serializers.ModelSerializer):
-
+    """Сериализатор для отображения модели Recipe при подписки."""
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'cooking_time', 'image')
 
 
 class FollowSerializer(serializers.Serializer):
+    """Сериализатор для модели Follow."""
     email = serializers.ReadOnlyField(source='author.email')
     id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(source='author.username')
@@ -119,7 +126,7 @@ class FollowSerializer(serializers.Serializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-
+    """Сериализатор для модели Tag."""
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug',)
@@ -127,7 +134,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-
+    """Сериализатор для модели Ingredient."""
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit',)
@@ -153,7 +160,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         return obj
 
 
-# Custom image field - handles base 64 encoded images
 class Base64ImageField(serializers.ImageField):
     """
     Пользовательское поле изображения -
@@ -171,6 +177,7 @@ class Base64ImageField(serializers.ImageField):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Recipe."""
     image = Base64ImageField()
     author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(

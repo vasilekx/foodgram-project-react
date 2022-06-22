@@ -1,8 +1,6 @@
 # api/permissions.py
 
-from rest_framework.permissions import (
-    BasePermission, SAFE_METHODS, IsAuthenticatedOrReadOnly
-)
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsOwnerOrReadOnly(BasePermission):
@@ -30,11 +28,8 @@ class IsOwner(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        # r1 = request.user.is_owner(obj)
-        # r2 = obj.author == request.user
         return (
             request.user
             and request.user.is_authenticated
             and obj.author == request.user
-            # and request.user.is_owner(obj)
         )

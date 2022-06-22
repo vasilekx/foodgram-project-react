@@ -41,22 +41,6 @@ class UserViewSet(DjoserUserViewSet):
     """Управление пользователями."""
     queryset = User.objects.all()
     lookup_field = 'pk'
-    # permission_classes = (IsAdministrator,)
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('username',)
-
-    # @action(
-    #     methods=['get'],
-    #     detail=False,
-    #     url_path='me',
-    #     url_name='users_detail',
-    #     permission_classes=[permissions.IsAuthenticated],
-    #     serializer_class=MeUserSerializer,
-    # )
-    # def users_detail(self, request):
-    #     user = request.user
-    #     serializer = self.get_serializer(user)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         methods=['post', 'delete'],
@@ -184,7 +168,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.AllowAny],
     )
     def download_shopping_cart(self, request):
-        # return HttpResponse(html_to_pdf_2(), content_type='application/pdf')
         user = request.user
         purchases_data = user.purchases.all().select_related(
             'recipe'
