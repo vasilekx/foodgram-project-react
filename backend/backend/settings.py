@@ -8,13 +8,10 @@ load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# SECRET_KEY = '8tn-zzsg(kowyzm0)1xp#1cy2^1au#imt@eb@m)_n#1ei(^yay'
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', default='None')
 
-# DEBUG = True
-DEBUG = True
+DEBUG = False
 
-# ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', default='web localhost 127.0.0.1 [::1]]').split(" ")
 
 INSTALLED_APPS = [
@@ -66,13 +63,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
 
 DATABASES = {
     'default': {
@@ -143,28 +133,11 @@ DJOSER = {
     'HIDE_USERS': False,
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
-        # 'user_list': ['rest_framework.permissions.IsAuthenticated'],
-        # 'user_create': ['rest_framework.permissions.AllowAny'],
-        # 'token_create': ['rest_framework.permissions.AllowAny'],
-        # 'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
-        # 'activation': ['rest_framework.permissions.AllowAny'],
-        # 'password_reset': ['rest_framework.permissions.AllowAny'],
-        # 'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
-        # 'set_password': ['rest_framework.permissions.CurrentUserOrAdmin'],
-        # 'username_reset': ['rest_framework.permissions.AllowAny'],
-        # 'username_reset_confirm': ['rest_framework.permissions.AllowAny'],
-        # 'set_username': ['rest_framework.permissions.CurrentUserOrAdmin'],
-        # 'user_delete': ['rest_framework.permissions.IsAdminUser'],
     },
     'SERIALIZERS': {
         'user': 'api.serializers.UserSerializer',
         'user_create': 'api.serializers.UserCreateSerializer',
         'current_user': 'api.serializers.UserSerializer',
-        # 'user': 'api.serializers.UserSerializer',
-        # 'user_create': 'api.serializers.UserSerializer',
-        # 'user_list': 'api.serializers.UserSerializer',
-        # 'user_create': 'api.serializers.UserSerializer',
-        # 'user': 'djoser.serializers.UserSerializer',
     },
 }
 
