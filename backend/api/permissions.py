@@ -4,10 +4,6 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsOwnerOrReadOnly(BasePermission):
-    """
-    Разрешение на уровне объекта, позволяющее редактировать объект только
-    владельцам. Предполагается, что экземпляр модели имеет атрибут `author`.
-    """
 
     def has_permission(self, request, view):
         return (

@@ -3,8 +3,16 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import (Follow, User, Ingredient, Tag, Recipe, RecipeTag,
-                     RecipeIngredient, Favorite, ShoppingCart)
+from .models import (
+    Follow,
+    Ingredient,
+    Tag,
+    Recipe,
+    RecipeTag,
+    RecipeIngredient,
+    Favorite,
+    ShoppingCart
+)
 
 
 class RecipeTagInline(admin.TabularInline):
@@ -25,9 +33,6 @@ class RecipeAdmin(admin.ModelAdmin):
               'image')
     readonly_fields = ('get_quantity_added_favorites', 'get_tags')
     list_display = ('pk', 'name', 'author', 'get_tags')
-    # list_display_links = ('name', 'text', 'get_tags')
-                    # 'tags', 'ingredients')
-    # list_editable = ('get_tags',)
     search_fields = ('name', 'author__username')
     list_filter = ('author', 'name', 'tags__name')
     empty_value_display = '-пусто-'
@@ -35,7 +40,6 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def get_tags(self, obj):
         return [tag.name for tag in obj.tags.all()]
-    # get_tags.admin_order_field = 'post__pk'
 
     def get_quantity_added_favorites(self, obj):
         return obj.favorites.count()
@@ -56,7 +60,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'recipe_pk',  'recipe',
+    list_display = ('pk', 'recipe_pk', 'recipe',
                     'ingredient_pk', 'ingredient', 'amount')
 
     def recipe_pk(self, obj):

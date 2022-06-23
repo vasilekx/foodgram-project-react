@@ -6,17 +6,20 @@ import uuid
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
+
 from djoser.serializers import (
     UserCreateSerializer as DjoserUserCreateSerializer,
     UserSerializer as DjoserUserSerializer
 )
-
 from foodgram.models import (
-    Ingredient, Tag, Follow,
-    Recipe, RecipeTag, RecipeIngredient,
+    Ingredient,
+    Tag,
+    Follow,
+    Recipe,
+    RecipeTag,
+    RecipeIngredient,
     User
 )
-
 from users.validators import validate_username
 
 from .validators import validate_ingredients
@@ -101,11 +104,10 @@ class FollowSerializer(serializers.Serializer):
 
     def get_is_subscribed(self, obj):
         request_user = self.context.get('request').user.id
-        queryset = Follow.objects.filter(
+        return Follow.objects.filter(
             user=request_user,
             author=obj.author
         ).exists()
-        return queryset
 
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
@@ -206,13 +208,12 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_ingredients(self, value):
         """Получение ключа ingredients."""
-        ingredient_list = RecipeIngredientSerializer(
+        return RecipeIngredientSerializer(
             value.ingredients.all(),
             many=True,
             read_only=True,
             context={'id': value.id}
         ).data
-        return ingredient_list
 
     def current_user(self):
         return self.context.get('request').user
@@ -241,7 +242,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     def validate_tags(self, value):
         """Проверка дублирования тегов."""
         if len(value) != len(set(value)):
-            raise serializers.ValidationError('Недопустимо дублирование тегов.')
+            raise serializers.ValidationError(
+                'Недопустимо дублирование тегов.'
+            )
         return value
 
     def validate(self, data):

@@ -2,14 +2,20 @@
 
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = '8tn-zzsg(kowyzm0)1xp#1cy2^1au#imt@eb@m)_n#1ei(^yay'
+# SECRET_KEY = '8tn-zzsg(kowyzm0)1xp#1cy2^1au#imt@eb@m)_n#1ei(^yay'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', default='None')
 
 DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', default='web localhost 127.0.0.1 [::1]]').split(" ")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -22,8 +28,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
-    # 'corsheaders',
     'django_filters',
+    'corsheaders',
     'users.apps.UsersConfig',
     'foodgram.apps.FoodgramConfig',
     'api.apps.ApiConfig',
@@ -32,7 +38,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware', # CORS
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -68,6 +74,17 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+#         'NAME': os.getenv('POSTGRES_DB', default='postgres_db_1'),
+#         'USER': os.getenv('POSTGRES_USER', default='postgres_user_1'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='qawsed123456'),
+#         'HOST': os.getenv('DB_HOST', default='db'),
+#         'PORT': os.getenv('DB_PORT', default='5432')
+#     }
+# }
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -85,13 +102,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False
+USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
@@ -112,21 +129,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 
-    # 'DEFAULT_AUTHENTICATION_CLASSES': (
-    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
-    # ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
 
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    # custom pagination
     'DEFAULT_PAGINATION_CLASS': 'api.pagination.FoodgramPagination',
-    'PAGE_SIZE': 10,
-
-    # 'SEARCH_PARAM': 'search', # def
-    # 'SEARCH_PARAM': 'name',  # For Ingredient
+    'PAGE_SIZE': 6,
 }
 
 DJOSER = {
@@ -152,7 +160,6 @@ DJOSER = {
         'user': 'api.serializers.UserSerializer',
         'user_create': 'api.serializers.UserCreateSerializer',
         'current_user': 'api.serializers.UserSerializer',
-
         # 'user': 'api.serializers.UserSerializer',
         # 'user_create': 'api.serializers.UserSerializer',
         # 'user_list': 'api.serializers.UserSerializer',
@@ -161,20 +168,20 @@ DJOSER = {
     },
 }
 
-
 AUTH_USER_MODEL = 'users.User'
 
 RESERVED_USERNAME: str = r'me'
 
-ACCEPT_REGEX = False
-REJECT_REGEX = True
+ACCEPT_REGEX: bool = False
+REJECT_REGEX: bool = True
 
-USERNAME_REGEXES = [
+USERNAME_REGEXES: list = [
     (fr'(^{RESERVED_USERNAME})$', REJECT_REGEX,),
     (r'(^[\w.@+-]+)$', ACCEPT_REGEX,),
 ]
 
-COLORS_HEX_REGEX = (r'^#(?:[0-9a-fA-F]{6})$', ACCEPT_REGEX,)
+COLORS_HEX_REGEX: tuple = (r'^#(?:[0-9a-fA-F]{6})$', ACCEPT_REGEX,)
 
-# soon for api
-# REST_FRAMEWORK
+CORS_ALLOW_ALL_ORIGINS = True  # Старое наименование CORS_ORIGIN_ALLOW_ALL
+CORS_URLS_REGEX = r'^/api/.*$'
+# CORS_ALLOWED_ORIGINS = []  # Старое наименование  CORS_ORIGIN_WHITELIST
