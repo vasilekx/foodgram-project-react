@@ -1,7 +1,3 @@
-import base64
-import uuid
-
-from django.core.files.base import ContentFile
 from djoser.serializers import (
     UserCreateSerializer as DjoserUserCreateSerializer,
     UserSerializer as DjoserUserSerializer
@@ -13,6 +9,7 @@ from foodgram.models import (
     Follow, Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag, User
 )
 from users.validators import validate_username
+from .fields import Base64ImageField
 from .validators import validate_ingredients
 
 
@@ -141,18 +138,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         return obj
 
 
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            id = uuid.uuid4()
-            data = ContentFile(
-                base64.b64decode(imgstr),
-                name=id.urn[9:] + '.' + ext)
-        return super(Base64ImageField, self).to_internal_value(data)
-
-
 class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     author = UserSerializer(read_only=True)
@@ -232,12 +217,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)
-        for tag in tags:
-            current_tag = get_object_or_404(Tag, pk=tag.pk)
-            RecipeTag.objects.create(
-                recipe=recipe,
-                tag=current_tag
-            )
+        RecipeTag.objects.bulk_create(
+            [RecipeTag(recipe=recipe, tag=tag) for tag in tags]
+        )
         for recipe_ingredient in ingredients:
             RecipeIngredient.objects.create(
                 recipe=recipe,
@@ -254,7 +236,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         for tag in tags_data:
             if tag in tags:
                 tags.remove(tag)
-                print(tags)
             else:
                 RecipeTag.objects.create(recipe=instance, tag=tag)
         if tags:
@@ -265,16 +246,16 @@ class RecipeSerializer(serializers.ModelSerializer):
                     tag=tag
                 ).delete()
         for ingredient in ingredients_data:
-            id, amount = ingredient.values()
-            if id in ingredients:
+            pk, amount = ingredient.values()
+            if pk in ingredients:
                 RecipeIngredient.objects.filter(
-                    recipe_id=instance.id,
-                    ingredient_id=id
+                    recipe_id=instance.pk,
+                    ingredient_id=pk
                 ).update(amount=amount)
-                ingredients.remove(id)
+                ingredients.remove(pk)
             else:
                 instance.ingredients.add(
-                    id, through_defaults={'amount': amount}
+                    pk, through_defaults={'amount': amount}
                 )
         if ingredients:
             instance.ingredients.remove(*ingredients)
