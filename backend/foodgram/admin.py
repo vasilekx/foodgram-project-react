@@ -1,17 +1,9 @@
-# foodgram/admin.py
-
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 from .models import (
-    Follow,
-    Ingredient,
-    Tag,
-    Recipe,
-    RecipeTag,
-    RecipeIngredient,
-    Favorite,
-    ShoppingCart
+    Favorite, Follow, Ingredient, Recipe, RecipeIngredient, RecipeTag,
+    ShoppingCart, Tag
 )
 
 

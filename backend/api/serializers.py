@@ -1,32 +1,22 @@
-# api/serializers.py
-
 import base64
 import uuid
 
 from django.core.files.base import ContentFile
-from rest_framework import serializers
-from rest_framework.generics import get_object_or_404
-
 from djoser.serializers import (
     UserCreateSerializer as DjoserUserCreateSerializer,
     UserSerializer as DjoserUserSerializer
 )
+from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
+
 from foodgram.models import (
-    Ingredient,
-    Tag,
-    Follow,
-    Recipe,
-    RecipeTag,
-    RecipeIngredient,
-    User
+    Follow, Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag, User
 )
 from users.validators import validate_username
-
 from .validators import validate_ingredients
 
 
 class MixinUserSerializer:
-    """Mixin для модели User."""
     username = serializers.CharField(max_length=150, required=True)
     email = serializers.EmailField(max_length=254, required=True)
 
@@ -38,7 +28,6 @@ class MixinUserSerializer:
 
 
 class UserSerializer(MixinUserSerializer, DjoserUserSerializer):
-    """Сериализатор для модели User."""
     password = serializers.CharField(write_only=True)
     is_subscribed = serializers.SerializerMethodField()
 
@@ -56,7 +45,6 @@ class UserSerializer(MixinUserSerializer, DjoserUserSerializer):
 
 
 class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
-    """Сериализатор создания модели User."""
     class Meta(MixinUserSerializer.Meta):
         pass
 
@@ -66,10 +54,6 @@ class UserCreateSerializer(MixinUserSerializer, DjoserUserCreateSerializer):
 
 
 class FavoriteOrShoppingCartRecipeSerializer(serializers.Serializer):
-    """
-    Сериализатор для отображения модели Recipe
-    при добавление в избранное/список покупок.
-    """
     id = serializers.ReadOnlyField(source='recipe.id')
     name = serializers.ReadOnlyField(source='recipe.name')
     cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
@@ -80,14 +64,12 @@ class FavoriteOrShoppingCartRecipeSerializer(serializers.Serializer):
 
 
 class FollowRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для отображения модели Recipe при подписки."""
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'cooking_time', 'image')
 
 
 class FollowSerializer(serializers.Serializer):
-    """Сериализатор для модели Follow."""
     email = serializers.ReadOnlyField(source='author.email')
     id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(source='author.username')
@@ -128,7 +110,6 @@ class FollowSerializer(serializers.Serializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Tag."""
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug',)
@@ -136,7 +117,6 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Ingredient."""
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit',)
@@ -144,7 +124,6 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели AmountIngredient."""
     name = serializers.ReadOnlyField()
     measurement_unit = serializers.ReadOnlyField()
     amount = serializers.SerializerMethodField()
@@ -163,10 +142,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class Base64ImageField(serializers.ImageField):
-    """
-    Пользовательское поле изображения -
-    обрабатывает изображения в кодировке base64.
-    """
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
@@ -179,7 +154,6 @@ class Base64ImageField(serializers.ImageField):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Recipe."""
     image = Base64ImageField()
     author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
@@ -207,7 +181,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ('is_favorited', 'is_in_shopping_cart',)
 
     def get_ingredients(self, value):
-        """Получение ключа ingredients."""
         return RecipeIngredientSerializer(
             value.ingredients.all(),
             many=True,
@@ -240,7 +213,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return data
 
     def validate_tags(self, value):
-        """Проверка дублирования тегов."""
         if len(value) != len(set(value)):
             raise serializers.ValidationError(
                 'Недопустимо дублирование тегов.'

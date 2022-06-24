@@ -1,10 +1,8 @@
-# foodgram/management/commands/load_initial_data.py
-
 import csv
 import os
 
-from django.core.management import BaseCommand
 from django.conf import settings
+from django.core.management import BaseCommand
 from django.utils.translation import ugettext_lazy as _
 
 from foodgram.models import Ingredient, Tag, User

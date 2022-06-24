@@ -1,5 +1,3 @@
-# foodgram/validators.py
-
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _

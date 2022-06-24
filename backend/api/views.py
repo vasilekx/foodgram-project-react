@@ -1,43 +1,29 @@
-# api/views.py
-
+from django.db.models import Case, IntegerField, Q, Sum, Value, When
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
-from django.http import HttpResponse
-from django.db.models import Sum, IntegerField, Value, Case, When, Q
-from rest_framework.response import Response
-from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from foodgram.models import (
-    User,
-    Ingredient,
-    Tag,
-    Recipe,
-    Follow,
-    Favorite,
-    ShoppingCart
+    Favorite, Follow, Ingredient, Recipe, ShoppingCart, Tag, User
 )
-
 from .filter import RecipeFilter
-from .permissions import IsOwnerOrReadOnly, IsOwner
+from .permissions import IsOwner, IsOwnerOrReadOnly
 from .serializers import (
-    IngredientSerializer,
-    TagSerializer,
-    RecipeSerializer,
-    FollowSerializer,
-    FavoriteOrShoppingCartRecipeSerializer
+    FavoriteOrShoppingCartRecipeSerializer, FollowSerializer,
+    IngredientSerializer, RecipeSerializer, TagSerializer
 )
 from .utilities import (
-    create_or_delete_favorite_or_purchase_recipe,
-    delete_object,
-    response_created_object,
+    create_or_delete_favorite_or_purchase_recipe, delete_object,
+    response_created_object
 )
 
 
 class UserViewSet(DjoserUserViewSet):
-    """Управление пользователями."""
     queryset = User.objects.all()
     lookup_field = 'pk'
 

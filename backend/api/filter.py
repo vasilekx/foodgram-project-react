@@ -1,5 +1,3 @@
-# api/filter.py
-
 import django_filters as filters
 
 from foodgram.models import Recipe

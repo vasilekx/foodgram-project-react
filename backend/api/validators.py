@@ -1,5 +1,3 @@
-# api/validators.py
-
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
@@ -31,10 +29,9 @@ def validate_ingredients(ingredients: dict) -> bool:
                     }
                 }
             )
-        ingredient = Ingredient.objects.filter(
-            id=ingredient_item.get('id')
-        )
-        if not ingredient:
+        ingredient = Ingredient.objects.filter(id=ingredient_item.get('id'))
+        ingredient_exists = ingredient.exists()
+        if not ingredient_exists:
             raise serializers.ValidationError(
                 {
                     'ingredients': {
