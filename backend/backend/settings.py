@@ -1,5 +1,3 @@
-# backend/settings.py
-
 import os
 
 from dotenv import load_dotenv
@@ -10,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', default='None')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', default='web localhost 127.0.0.1 [::1]]').split(" ")
 
@@ -22,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'debug_toolbar',
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
@@ -41,6 +40,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+# For Django Debug Toolbar
+INTERNAL_IPS = [
+    '127.0.0.1',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -64,16 +69,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
-        'NAME': os.getenv('POSTGRES_DB', default='postgres_db_1'),
-        'USER': os.getenv('POSTGRES_USER', default='postgres_user_1'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='qawsed123456'),
-        'HOST': os.getenv('DB_HOST', default='db'),
-        'PORT': os.getenv('DB_PORT', default='5432')
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+            'NAME': os.getenv('POSTGRES_DB', default='postgres_db_1'),
+            'USER': os.getenv('POSTGRES_USER', default='postgres_user_1'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='qawsed123456'),
+            'HOST': os.getenv('DB_HOST', default='db'),
+            'PORT': os.getenv('DB_PORT', default='5432')
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -102,7 +115,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles')]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -155,6 +167,5 @@ USERNAME_REGEXES: list = [
 
 COLORS_HEX_REGEX: tuple = (r'^#(?:[0-9a-fA-F]{6})$', ACCEPT_REGEX,)
 
-CORS_ALLOW_ALL_ORIGINS = True  # Старое наименование CORS_ORIGIN_ALLOW_ALL
-CORS_URLS_REGEX = r'^/api/.*$', r'^/admin/.*$'
-# CORS_ALLOWED_ORIGINS = []  # Старое наименование  CORS_ORIGIN_WHITELIST
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_URLS_REGEX = r'^(/api/|/admin/).*$'

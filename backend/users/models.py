@@ -1,5 +1,3 @@
-# users/models.py
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -31,10 +29,10 @@ class User(AbstractUser):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
-    def __str__(self):
-        return self.username
-
     class Meta:
         ordering = ['username']
         verbose_name = _('Пользователь')
         verbose_name_plural = _('Пользователи')
+
+    def __str__(self):
+        return self.username
