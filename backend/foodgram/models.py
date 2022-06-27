@@ -30,11 +30,11 @@ class Follow(models.Model):
         verbose_name_plural = _('Подписки')
         constraints = [
             models.UniqueConstraint(fields=['user', 'author'],
-                                    name='unique_relationships'),
+                                    name='Follow_unique_relationships'),
             models.CheckConstraint(check=~models.Q(user=models.F("author")),
                                    name="prevent_self_follow"),
         ]
-
+    
     def __str__(self):
         return '{} подписан на {}'.format(
             self.user.get_username(),
@@ -61,7 +61,7 @@ class Ingredient(models.Model):
         verbose_name_plural = _('Ингредиенты')
         constraints = [
             models.UniqueConstraint(fields=['name', 'measurement_unit'],
-                                    name='unique_relationships'),
+                                    name='Ingredient_unique_relationships'),
         ]
 
     def __str__(self):
@@ -177,7 +177,7 @@ class RecipeTag(models.Model):
         verbose_name_plural = _('Теги рецепта')
         constraints = [
             models.UniqueConstraint(fields=['recipe', 'tag'],
-                                    name='unique_relationships'),
+                                    name='RecipeTag_unique_relationships'),
         ]
 
     def __str__(self):
@@ -209,7 +209,7 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = _('Ингредиенты рецепта')
         constraints = [
             models.UniqueConstraint(fields=['recipe', 'ingredient'],
-                                    name='unique_relationships')
+                                    name='RecipeIngredient_unique_relationships')
         ]
 
     def __str__(self):
@@ -240,7 +240,7 @@ class Favorite(models.Model):
         verbose_name_plural = _('Избранные рецепты')
         constraints = [
             models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_relationships')
+                                    name='Favorite_unique_relationships')
         ]
 
     def __str__(self):
@@ -269,7 +269,7 @@ class ShoppingCart(models.Model):
         verbose_name_plural = _('Корзины')
         constraints = [
             models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_relationships')
+                                    name='ShoppingCart_unique_relationships')
         ]
 
     def __str__(self):
