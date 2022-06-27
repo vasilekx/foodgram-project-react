@@ -13,7 +13,9 @@ def validate_ingredients(ingredients: dict) -> bool:
         )
     ingredient_list = []
     for ingredient_item in ingredients:
-        if not ingredient_item.get('id'):
+        ingredient_id = ingredient_item['ingredient']['id']
+        amount = ingredient_item['amount']
+        if not ingredient_id:
             raise serializers.ValidationError(
                 {
                     'ingredients': {
@@ -21,7 +23,7 @@ def validate_ingredients(ingredients: dict) -> bool:
                     }
                 }
             )
-        if not ingredient_item.get('amount'):
+        if not amount:
             raise serializers.ValidationError(
                 {
                     'ingredients': {
@@ -29,7 +31,7 @@ def validate_ingredients(ingredients: dict) -> bool:
                     }
                 }
             )
-        ingredient = Ingredient.objects.filter(id=ingredient_item.get('id'))
+        ingredient = Ingredient.objects.filter(id=ingredient_id)
         ingredient_exists = ingredient.exists()
         if not ingredient_exists:
             raise serializers.ValidationError(
@@ -45,7 +47,7 @@ def validate_ingredients(ingredients: dict) -> bool:
                 'Недопустимо дублирование ингридиентов.'
             )
         ingredient_list.append(ingredient)
-        if int(ingredient_item.get('amount')) < 0:
+        if int(amount) < 0:
             raise serializers.ValidationError(
                 {
                     'ingredients': {
