@@ -41,17 +41,8 @@ def load_tags_data(list_data: list) -> None:
                 print(import_dict)
                 if file == 'ingredients.csv':
                     ingredient, _ = model.objects.get_or_create(**import_dict)
-                    # ingredient, _ = model.objects.get_or_create(
-                    #     name=row[0],
-                    #     measurement_unit=row[1]
-                    # )
                 if file == 'tags.csv':
                     tag, _ = model.objects.get_or_create(**import_dict)
-                    # tag, _ = model.objects.get_or_create(
-                    #     name=row[0],
-                    #     color=row[1],
-                    #     slug=row[2],
-                    # )
                 if file == 'users.csv':
                     raw_password = import_dict.pop('password')
                     user, created = model.objects.get_or_create(**import_dict)

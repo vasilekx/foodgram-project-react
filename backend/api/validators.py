@@ -47,14 +47,4 @@ def validate_ingredients(ingredients: dict) -> bool:
                 'Недопустимо дублирование ингридиентов.'
             )
         ingredient_list.append(ingredient)
-        if int(amount) < 0:
-            raise serializers.ValidationError(
-                {
-                    'ingredients': {
-                        'amount': (
-                            'Количества ингредиента меньше 0.'
-                        )
-                    }
-                }
-            )
     return True
