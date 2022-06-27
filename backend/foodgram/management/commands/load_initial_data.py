@@ -38,7 +38,6 @@ def load_tags_data(list_data: list) -> None:
                 import_dict = {
                     key: value for key, value in zip(header, row)
                 }
-                print(import_dict)
                 if file == 'ingredients.csv':
                     ingredient, _ = model.objects.get_or_create(**import_dict)
                 if file == 'tags.csv':
