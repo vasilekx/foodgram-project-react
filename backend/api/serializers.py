@@ -8,6 +8,7 @@ from foodgram.models import (
     Follow, Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag, User
 )
 from users.validators import validate_username
+
 from .fields import Base64ImageField
 from .validators import validate_ingredients
 
@@ -138,14 +139,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(),
     )
     ingredients = RecipeIngredientSerializer(many=True,
-                                              source='recipeingredient_set')
+                                             source='recipeingredient_set')
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'text', 'author', 'cooking_time', 'image',
-            'is_favorited', 'is_in_shopping_cart', 'tags', 'ingredients',)
+                  'is_favorited', 'is_in_shopping_cart', 'tags',
+                  'ingredients',)
         read_only_fields = ('is_favorited', 'is_in_shopping_cart',)
 
     def current_user(self):
