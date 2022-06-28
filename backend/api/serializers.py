@@ -8,7 +8,6 @@ from foodgram.models import (
     Follow, Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag, User
 )
 from users.validators import validate_username
-
 from .fields import Base64ImageField
 from .validators import validate_ingredients
 

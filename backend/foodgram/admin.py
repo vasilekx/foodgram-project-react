@@ -1,10 +1,8 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import (
-    Favorite, Follow, Ingredient, Recipe, RecipeIngredient, RecipeTag,
-    ShoppingCart, Tag
-)
+from .models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredient,
+                     RecipeTag, ShoppingCart, Tag)
 
 
 class RecipeTagInline(admin.TabularInline):
