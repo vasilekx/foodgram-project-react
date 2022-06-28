@@ -34,7 +34,7 @@ class Follow(models.Model):
             models.CheckConstraint(check=~models.Q(user=models.F("author")),
                                    name="prevent_self_follow"),
         ]
-    
+
     def __str__(self):
         return '{} подписан на {}'.format(
             self.user.get_username(),
@@ -208,8 +208,9 @@ class RecipeIngredient(models.Model):
         verbose_name = _('Ингредиент рецепта')
         verbose_name_plural = _('Ингредиенты рецепта')
         constraints = [
-            models.UniqueConstraint(fields=['recipe', 'ingredient'],
-                                    name='RecipeIngredient_unique_relationships')
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='RecipeIngredient_unique_relationships')
         ]
 
     def __str__(self):

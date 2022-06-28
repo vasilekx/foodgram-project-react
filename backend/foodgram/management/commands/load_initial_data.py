@@ -7,14 +7,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from foodgram.models import Ingredient, Tag, User
 
-ALREDY_LOADED_ERROR_MESSAGE = _(
-    'База данных не пуста! '
-    'Если вам нужно перезагрузить данные из CSV-файла, '
-    'сначала удалите файл db.sqlite3. '
-    'Затем запустите "python manage.py migrate" '
-    'для создания новой пустой базы данных.'
-)
-
 data_files_list = [
     ['tags.csv', Tag],
     ['ingredients.csv', Ingredient],
@@ -54,12 +46,6 @@ class Command(BaseCommand):
     help = _('Загрузка данных')
 
     def handle(self, *args, **options):
-        # for lst in data_files_list:
-        #     if lst[1].objects.exists():
-        #         self.stdout.write(
-        #             self.style.WARNING(ALREDY_LOADED_ERROR_MESSAGE)
-        #         )
-        #         return
         get_dirs(data_files_list)
         self.stdout.write(_('Загрузка данных...'))
         try:

@@ -8,20 +8,15 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from foodgram.models import (
-    Favorite, Follow, Ingredient, Recipe, ShoppingCart, Tag, User
-)
-
+from foodgram.models import (Favorite, Follow, Ingredient, Recipe,
+                             ShoppingCart, Tag, User)
 from .filter import RecipeFilter
 from .permissions import IsOwner, IsOwnerOrReadOnly
-from .serializers import (
-    FavoriteOrShoppingCartRecipeSerializer, FollowSerializer,
-    IngredientSerializer, RecipeSerializer, TagSerializer
-)
-from .utilities import (
-    create_or_delete_favorite_or_purchase_recipe, delete_object,
-    response_created_object
-)
+from .serializers import (FavoriteOrShoppingCartRecipeSerializer,
+                          FollowSerializer, IngredientSerializer,
+                          RecipeSerializer, TagSerializer)
+from .utilities import (create_or_delete_favorite_or_purchase_recipe,
+                        delete_object, response_created_object)
 
 
 class UserViewSet(DjoserUserViewSet):
