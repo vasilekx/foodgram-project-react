@@ -55,7 +55,7 @@ DB_PORT=5432
 # секретный ключ Django
 DJANGO_SECRET_KEY='DJANGO_SECRET_KEY'
 # cписок хостов/доменов, для которым доступен проект
-DJANGO_ALLOWED_HOSTS='web localhost 127.0.0.1 [::1]'
+DJANGO_ALLOWED_HOSTS='xxx.xxx.xxx.xxx example.site.domain web localhost 127.0.0.1 [::1]'
 ```
 Создать и запустить контейнеры: 
 ```bash
