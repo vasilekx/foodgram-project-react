@@ -7,8 +7,7 @@
 ## Применяемые технологии
 [![Python](https://img.shields.io/badge/Python-3.7-blue?style=flat-square&logo=Python&logoColor=3776AB&labelColor=d0d0d0)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-2.2.16-blue?style=flat-square&logo=Django&logoColor=092E20&labelColor=d0d0d0)](https://www.djangoproject.com/)
-[![Django REST Framework](https://img.shields.io/badge/Django%20REST%20Framework-3.12.4-blue?style=flat-square&logo=Django&logoColor=a30000&labelColor=d0d0d0)](https://www.django-rest-framework.org/)
-[![Simple JWT](https://img.shields.io/badge/Simple%20JWT%20-4.7.2-blue?style=flat-square&logo=github&logoColor=4285F4&labelColor=d0d0d0)](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/)
+[![Django REST Framework](https://img.shields.io/badge/Django%20REST%20Framework-3.13.1-blue?style=flat-square&logo=Django&logoColor=a30000&labelColor=d0d0d0)](https://www.django-rest-framework.org/)
 [![gunicorn](https://img.shields.io/badge/gunicorn-20.0.4-blue?style=flat-square&logo=gunicorn&logoColor=499848&labelColor=d0d0d0)](https://gunicorn.org/)
 [![Postgres](https://img.shields.io/badge/Postgres-13.0-blue?style=flat-square&logo=PostgreSQL&logoColor=4169E1&labelColor=d0d0d0)](https://www.postgresql.org/)
 [![Nginx](https://img.shields.io/badge/Nginx-1.21.3-blue?style=flat-square&logo=NGINX&logoColor=009639&labelColor=d0d0d0)](https://nginx.org/ru/)
@@ -41,14 +40,22 @@ cd infra
 ```
 Cоздать в директории файл .env со следующими параметрами:
 ```python
-DB_ENGINE=django.db.backends.postgresql # указываем, что работаем с postgresql
-POSTGRES_DB=postgres_db_1 # имя базы данных
-POSTGRES_USER=postgres_user_1 # логин для подключения к базе данных
-POSTGRES_PASSWORD=qawsed123456 # пароль для подключения к БД (установите свой)
-DB_HOST=db # название сервиса (контейнера)
-DB_PORT=5432 # порт для подключения к БД
-DJANGO_SECRET_KEY='DJANGO_SECRET_KEY' # секретный ключ Django
-DJANGO_ALLOWED_HOSTS='web localhost 127.0.0.1 [::1]' # cписок хостов/доменов, для которым доступен проект
+# указываем, что работаем с postgresql
+DB_ENGINE=django.db.backends.postgresql
+# имя базы данных
+POSTGRES_DB=postgres_db_1
+# логин для подключения к базе данных
+POSTGRES_USER=postgres_user_1
+# пароль для подключения к БД (установите свой)
+POSTGRES_PASSWORD=qawsed123456
+# название сервиса (контейнера)
+DB_HOST=db
+# порт для подключения к БД
+DB_PORT=5432
+# секретный ключ Django
+DJANGO_SECRET_KEY='DJANGO_SECRET_KEY'
+# cписок хостов/доменов, для которым доступен проект
+DJANGO_ALLOWED_HOSTS='web localhost 127.0.0.1 [::1]'
 ```
 Создать и запустить контейнеры: 
 ```bash
@@ -73,14 +80,41 @@ sudo docker-compose exec web python manage.py collectstatic --no-input
 sudo docker-compose exec web python manage.py load_initial_data
 ```
 
-## Документация к API продуктового помощника
+## Сайт продуктового помощника
 ```
-http://x.x.x.x/x/
+http://mad-foodgram.sytes.net/recipes/
 ```
-## Административная панель
+или
 ```
-http://x.x.x.x/admin/
+http://51.250.30.154/recipes/
 ```
 
-## Авторы
+## Документация к API продуктового помощника
+```
+http://mad-foodgram.sytes.net/api/docs/
+```
+или 
+```
+http://51.250.30.154/api/docs/
+```
+
+## Административная панель
+```
+http://mad-foodgram.sytes.net/admin/
+```
+или
+```
+http://51.250.30.154/admin/
+```
+## Доступ к административной панели
+### Логин
+```
+admintwo
+```
+### Пароль
+```
+foodgram2022two@
+```
+
+## Автор
 1. Владислав Василенко ([vasilekx](https://github.com/vasilekx))
