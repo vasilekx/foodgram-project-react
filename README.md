@@ -81,40 +81,13 @@ sudo docker-compose exec web python manage.py load_initial_data
 ```
 
 ## Сайт продуктового помощника
-```
-http://mad-foodgram.sytes.net/recipes/
-```
-или
-```
-http://51.250.30.154/recipes/
-```
+[http://mad-foodgram.sytes.net/recipes/](http://mad-foodgram.sytes.net/recipes/)
 
 ## Документация к API продуктового помощника
-```
-http://mad-foodgram.sytes.net/api/docs/
-```
-или 
-```
-http://51.250.30.154/api/docs/
-```
+[http://mad-foodgram.sytes.net/api/docs/](http://mad-foodgram.sytes.net/api/docs/)
 
 ## Административная панель
-```
-http://mad-foodgram.sytes.net/admin/
-```
-или
-```
-http://51.250.30.154/admin/
-```
-## Доступ к административной панели
-### Логин
-```
-admintwo
-```
-### Пароль
-```
-foodgram2022two@
-```
+[http://mad-foodgram.sytes.net/admin/](http://mad-foodgram.sytes.net/admin/)
 
 ## Автор
 1. Владислав Василенко ([vasilekx](https://github.com/vasilekx))
